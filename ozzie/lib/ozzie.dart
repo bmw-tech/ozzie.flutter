@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'html_report.dart';
 
 const _rootFolderName = "ozzie";
 
@@ -24,6 +25,11 @@ class Ozzie {
     final file = await File(_filePath(screenshotName)).create(recursive: true);
     final pixels = await driver.screenshot();
     await file.writeAsBytes(pixels);
+  }
+
+  Future generateHtmlReport() async {
+    final file = File('$_rootFolderName/index.html');
+    await file.writeAsString(htmlReport);
   }
 
   Future _deleteExistingGroupFolder() async {

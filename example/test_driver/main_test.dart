@@ -13,6 +13,7 @@ void main() {
 
   tearDownAll(() async {
     if (driver != null) driver.close();
+    ozzie.generateHtmlReport();
   });
 
   test('initial counter is 0', () async {
