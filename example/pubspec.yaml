@@ -1,0 +1,21 @@
+name: example
+description: Flutter application to demo Ozzie.
+version: 1.0.0
+
+environment:
+  sdk: ">=2.0.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  ozzie:
+    path: ../ozzie/
+
+flutter:
+  uses-material-design: true

@@ -1,5 +1,6 @@
 library ozzie;
 
+import 'dart:async';
 import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -13,30 +14,31 @@ class Ozzie {
   const Ozzie._internal(this.driver, {this.groupName = "default"})
       : assert(driver != null);
 
-  factory Ozzie.initWith(
-          {@required FlutterDriver driver, @required String groupName}) =>
+  factory Ozzie.initWith(FlutterDriver driver, {@required String groupName}) =>
       Ozzie._internal(driver, groupName: groupName);
 
-  void takeScreenshot(String screenshotName) async {
+  Future takeScreenshot(String screenshotName) async {
     if (driver == null)
       throw ArgumentError('FlutterDriver is null. Did you initialize it?');
-    _deleteExistingGroupFolder();
+    await _deleteExistingGroupFolder();
     final file = await File(_filePath(screenshotName)).create(recursive: true);
     final pixels = await driver.screenshot();
-    file.writeAsBytes(pixels);
+    await file.writeAsBytes(pixels);
   }
 
-  void _deleteExistingGroupFolder() async {
-    final groupFolder = File(_groupFolderName);
-    if (await groupFolder.exists()) groupFolder.delete(recursive: true);
+  Future _deleteExistingGroupFolder() async {
+    final groupFolder = Directory(_groupFolderName);
+    if (await groupFolder.exists()) await groupFolder.delete(recursive: true);  
   }
 
   String get _groupFolderName => '$_rootFolderName/$groupName';
 
-  String _timestamp() => DateTime.now().toString();
+  String get _timestamp => DateTime.now().toIso8601String();
 
   String _fileName(String screenshotName) => '$_timestamp-$screenshotName.png';
 
-  String _filePath(String screenshotName) =>
-      '$_groupFolderName/$_fileName(screenshotName)';
+  String _filePath(String screenshotName) {
+    final fileName = _fileName(screenshotName);
+    return '$_groupFolderName/$fileName';
+  }
 }
