@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'reporter.dart';
 
-const _rootFolderName = "ozzie";
+const rootFolderName = "ozzie";
 
 class Ozzie {
   final FlutterDriver driver;
@@ -20,9 +20,6 @@ class Ozzie {
       Ozzie._internal(driver, groupName: groupName);
 
   Future takeScreenshot(String screenshotName) async {
-    if (driver == null) {
-      throw ArgumentError('FlutterDriver is null. Did you initialize it?'); 
-    } 
     if (_doesGroupFolderNeedToBeDeleted) {
       await _deleteExistingGroupFolder();
       _doesGroupFolderNeedToBeDeleted = false;
@@ -36,7 +33,7 @@ class Ozzie {
 
   Future generateHtmlReport() async {
     final reporter = Reporter();
-    await reporter.generateHtmlReport(_rootFolderName);
+    await reporter.generateHtmlReport(rootFolderName);
   }
 
   Future _deleteExistingGroupFolder() async {
@@ -47,7 +44,7 @@ class Ozzie {
     }
   }
 
-  String get _groupFolderName => '$_rootFolderName/$groupName';
+  String get _groupFolderName => '$rootFolderName/$groupName';
 
   String get _timestamp => DateTime.now().toIso8601String();
 
