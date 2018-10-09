@@ -11,20 +11,27 @@ const _rootFolderName = "ozzie";
 class Ozzie {
   final FlutterDriver driver;
   final String groupName;
+  var _doesGroupFolderNeedToBeDeleted = true;
 
-  const Ozzie._internal(this.driver, {this.groupName = "default"})
+  Ozzie._internal(this.driver, {this.groupName = "default"})
       : assert(driver != null);
 
   factory Ozzie.initWith(FlutterDriver driver, {@required String groupName}) =>
       Ozzie._internal(driver, groupName: groupName);
 
   Future takeScreenshot(String screenshotName) async {
-    if (driver == null)
-      throw ArgumentError('FlutterDriver is null. Did you initialize it?');
-    await _deleteExistingGroupFolder();
-    final file = await File(_filePath(screenshotName)).create(recursive: true);
+    if (driver == null) {
+      throw ArgumentError('FlutterDriver is null. Did you initialize it?'); 
+    } 
+    if (_doesGroupFolderNeedToBeDeleted) {
+      await _deleteExistingGroupFolder();
+      _doesGroupFolderNeedToBeDeleted = false;
+    }
+    final filePath = _filePath(screenshotName);
+    final file = await File(filePath).create(recursive: true);
     final pixels = await driver.screenshot();
     await file.writeAsBytes(pixels);
+    print('Ozzie took screenshot: $filePath');
   }
 
   Future generateHtmlReport() async {
@@ -34,7 +41,10 @@ class Ozzie {
 
   Future _deleteExistingGroupFolder() async {
     final groupFolder = Directory(_groupFolderName);
-    if (await groupFolder.exists()) await groupFolder.delete(recursive: true);  
+    if (await groupFolder.exists()) {
+      await groupFolder.delete(recursive: true);  
+      print('Ozzie has deleted the "$groupName" folder');
+    }
   }
 
   String get _groupFolderName => '$_rootFolderName/$groupName';

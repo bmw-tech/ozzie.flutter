@@ -19,4 +19,9 @@ void main() {
   test('initial counter is 0', () async {
     await ozzie.takeScreenshot('initial_counter_is_0');
   });
+
+  test('initial counter is 0', () async {
+    driver.tap(find.byType('FloatingActionButton'));
+    await ozzie.takeScreenshot('counter_is_1');
+  });
 }
