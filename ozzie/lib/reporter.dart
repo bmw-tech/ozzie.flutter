@@ -30,8 +30,7 @@ class Reporter {
     final directories = allFiles
         .where((f) => (f is Directory))
         .map((f) => f as Directory)
-        .toList()
-          ..sort();
+        .toList();
     var ozzieFiles = Map<String, List<String>>();
     directories.forEach((directory) {
       final screenshots = directory
