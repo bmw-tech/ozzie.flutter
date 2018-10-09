@@ -1,11 +1,11 @@
 name: ozzie
 description: A new flutter package project.
-version: 0.0.1
-author:
-homepage:
+version: 1.0.0
+author: Jorge Coca<jcocaramos@gmail.com>
+homepage: Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need.
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.0.0 <3.0.0"
 
 dependencies:
   flutter:
