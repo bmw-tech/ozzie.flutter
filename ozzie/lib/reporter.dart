@@ -48,7 +48,7 @@ class Reporter {
   }
 
   String _buildAccordion(String accordionName, List<String> images) {
-    final randomId = accordionName.length.toString();
+    final randomId = _accordionId(accordionName);
     return """
 <div class="card">
   <div class="card-header" id="heading$randomId">
@@ -82,11 +82,6 @@ class Reporter {
     return '<div class="row">$imageCards</div>';
   }
 
-  String _generateRandomId(int length) {
-    var rand = new Random();
-    var codeUnits = new List.generate(length, (index) {
-      return rand.nextInt(33) + 89;
-    });
-    return new String.fromCharCodes(codeUnits);
-  }
+  String _accordionId(String accordionName) =>
+      '${accordionName.trim().replaceAll(' ', '-').replaceAll('/', '-')}-${accordionName.length}';
 }
