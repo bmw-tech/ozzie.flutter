@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:io';
 
 import 'package:ozzie/html_report.dart';
@@ -19,15 +18,18 @@ class Reporter {
     final rootDirectory = Directory(rootFolderName);
     final allFiles =
         rootDirectory.listSync(recursive: false, followLinks: false);
-    final directories =
-        allFiles.where((f) => (f is Directory)).map((f) => f as Directory);
+    final directories = allFiles
+        .where((f) => (f is Directory))
+        .map((f) => f as Directory)
+        .toList()
+          ..sort();
     var ozzieFiles = Map<String, List<String>>();
     directories.forEach((directory) {
       final screenshots = directory
           .listSync(recursive: false, followLinks: false)
           .map((s) => s.path.replaceAll(rootFolderName, ''))
           .toList();
-      ozzieFiles[directory.path] = screenshots;
+      ozzieFiles[directory.path] = screenshots..sort();
     });
     return ozzieFiles;
   }
