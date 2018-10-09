@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'html_report.dart';
+import 'reporter.dart';
 
 const _rootFolderName = "ozzie";
 
@@ -29,6 +30,8 @@ class Ozzie {
 
   Future generateHtmlReport() async {
     final file = File('$_rootFolderName/index.html');
+    final reporter = Reporter();
+    await reporter.getOzzieFiles(_rootFolderName);
     await file.writeAsString(htmlReport);
   }
 
