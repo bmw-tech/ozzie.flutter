@@ -9,8 +9,17 @@ class Reporter {
     final imageGallery = _buildImageGallery(ozzieFiles);
     String htmlContent =
         '$beginningOfHtmlReport$imageGallery$endingOfHtmlReport';
-    final file = File('$rootFolderName/index.html');
+    final filePath = '$rootFolderName/index.html';
+    final file = File(filePath);
     await file.writeAsString(htmlContent);
+    print(""" 
+         _ 
+     _n_|_|_,_
+    |===.-.===|
+    |  ((_))  |
+    '==='-'==='  
+    """);
+    print('Ozzie has generated the HTML at: $filePath');
   }
 
   Future<Map<String, List<String>>> _getOzzieFiles(
@@ -76,6 +85,9 @@ class Reporter {
 <div class="col-md-3">
   <div class="card mb-3 shadow-sm">
     <img class="card-img-top" style="width: 100%; display: block;" src="./$imagePath" data-holder-rendered="true">
+    <div card="card-body">
+      <p class="card-text">$imagePath</p>
+    </div>
   </div>
 </div>
       """);
