@@ -71,8 +71,8 @@ class Reporter {
     var imageCardsBuffer = StringBuffer();
     images.forEach((imagePath) {
       imageCardsBuffer.write("""
-<div class="col-md-4">
-  <div class="card mb-4 shadow-sm">
+<div class="col-md-3">
+  <div class="card mb-3 shadow-sm">
     <img class="card-img-top" style="width: 100%; display: block;" src="./$imagePath" data-holder-rendered="true">
   </div>
 </div>
