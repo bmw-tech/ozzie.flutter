@@ -15,7 +15,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   ozzie:
-    path: ../ozzie/
+    path: ..
 
 flutter:
   uses-material-design: true

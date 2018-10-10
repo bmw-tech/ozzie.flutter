@@ -39,7 +39,7 @@ class Ozzie {
   Future _deleteExistingGroupFolder() async {
     final groupFolder = Directory(_groupFolderName);
     if (await groupFolder.exists()) {
-      await groupFolder.delete(recursive: true);  
+      await groupFolder.delete(recursive: true);
       print('Ozzie has deleted the "$groupName" folder');
     }
   }
