@@ -1,6 +1,7 @@
 # ozzie.flutter
 
 [![Build Status](https://travis-ci.com/jorgecoca/ozzie.flutter.svg?branch=master)](https://travis-ci.com/jorgecoca/ozzie.flutter)
+[![codecov](https://codecov.io/gh/jorgecoca/ozzie.flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/jorgecoca/ozzie.flutter)
 [![Pub](https://img.shields.io/pub/v/ozzie.svg)](https://pub.dartlang.org/packages/ozzie)
 
 ![ozzie icon art](./art/ozzie.png)
@@ -49,6 +50,10 @@ void main() {
   });
 }
 ```
+
+After this, a report will be generated inside your project as `ozzie/index.html`:
+
+![report example](./art/report.png)
 
 ## License
 
