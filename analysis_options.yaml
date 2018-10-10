@@ -1,0 +1,4 @@
+analyzer:
+  exclude:
+    - example/test_driver/main.dart
+    - exmaple/test/widget_test.dart
