@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.0.2(2018-11-27)
+
+* Update Mockito to 4.+
+
 ## Version 1.0.1(2018-10-10)
 
 * Reorganize folder support for better package management
