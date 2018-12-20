@@ -18,7 +18,7 @@ class Ozzie {
   Ozzie._internal(this.driver, {this.groupName = "default"})
       : assert(driver != null);
 
-  /// Build and [Ozzie] object with the given [FlutterDriver]. If a `groupName`
+  /// Build an [Ozzie] object with the given [FlutterDriver]. If a `groupName`
   /// is given, it will be used to group your screenshots in the HTML report; 
   /// otherwise, they will be placed under a "default" group.
   /// This method is intended to be called in your tests `setUp`, immediately
@@ -35,7 +35,7 @@ class Ozzie {
 
   /// It takes a an PNG screnshot of the given state of the application when 
   /// being called. The name of the screenshot will be the given `screenshotName`
-  /// prefixed by the time stamp of that moment, and suffixed by `.png`.
+  /// prefixed by the timestamp of that moment, and suffixed by `.png`.
   /// It will be stored in a folder whose name will be the given `groupName`
   /// when calling `Ozzie.initWith`.
   Future takeScreenshot(String screenshotName) async {

@@ -1,4 +1,4 @@
-/// Beggining of the generated HTML report.
+/// Beginning of the generated HTML report.
 /// It includes the declaration of the <head> plus the <header> of the report.
 const beginningOfHtmlReport = """
 <!doctype html>
