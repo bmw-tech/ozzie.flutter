@@ -1,3 +1,5 @@
+/// Beggining of the generated HTML report.
+/// It includes the declaration of the <head> plus the <header> of the report.
 const beginningOfHtmlReport = """
 <!doctype html>
 <html lang="en">
@@ -36,6 +38,8 @@ const beginningOfHtmlReport = """
         <div class="row">
 """;
 
+/// Ending of the generated HTML report.
+/// It includes the <footer> and the setup for the different JS libraries used.
 const endingOfHtmlReport = """
 </div>
       </div>
