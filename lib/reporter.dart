@@ -3,7 +3,15 @@ import 'dart:io';
 
 import 'package:ozzie/html_report.dart';
 
+/// [Reporter] is the class in charge of actually generating the HTML report.
 class Reporter {
+
+  /// This method is what generates the HTML report with the given
+  /// `rootFolderName`.
+  /// It should only be called after all the screnshots have been taken,
+  /// so the reporter can inspect the given `rootFolderName` and generate
+  /// the proper HTML code. That's why, calling this method from
+  /// `Ozzie.generateHtmlReport` is ideal.
   Future generateHtmlReport(String rootFolderName) async {
     final ozzieFiles = await _getOzzieFiles(rootFolderName);
     final imageGallery = _buildImageGallery(ozzieFiles);
