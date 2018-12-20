@@ -104,5 +104,5 @@ class Reporter {
   }
 
   String _accordionId(String accordionName) =>
-      '${accordionName.trim().replaceAll(' ', '-').replaceAll('/', '-')}-${accordionName.length}';
+      '${accordionName.trim().replaceAll(' ', '_').replaceAll('/', '_')}${accordionName.length}';
 }
