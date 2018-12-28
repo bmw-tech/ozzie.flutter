@@ -9,6 +9,7 @@ void main() {
   setUp(() async {
     reporter = Reporter();
     await File('$testFolder/alex/a.png').create(recursive: true);
+    await File('$testFolder/alex/b.png').create(recursive: true);
     await File('$testFolder/rim/charity.png').create(recursive: true);
   });
 
