@@ -1,20 +1,25 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:ozzie/html_report.dart';
 
 /// [Reporter] is the class in charge of actually generating the HTML report.
 class Reporter {
-
   /// This method is what generates the HTML report with the given
   /// `rootFolderName`.
   /// It should only be called after all the screnshots have been taken,
   /// so the reporter can inspect the given `rootFolderName` and generate
   /// the proper HTML code. That's why, calling this method from
   /// `Ozzie.generateHtmlReport` is ideal.
-  Future generateHtmlReport(String rootFolderName) async {
+  /// The `groupName` is necessary to generate the ZIP files included in
+  /// the HTML report.
+  Future generateHtmlReport({
+    @required String rootFolderName,
+    @required String groupName,
+  }) async {
     final ozzieFiles = await _getOzzieFiles(rootFolderName);
-    final imageGallery = _buildImageGallery(ozzieFiles);
+    final imageGallery = _buildImageGallery(groupName, ozzieFiles);
     String htmlContent =
         '$beginningOfHtmlReport$imageGallery$endingOfHtmlReport';
     final filePath = '$rootFolderName/index.html';
@@ -31,7 +36,8 @@ class Reporter {
   }
 
   Future<Map<String, List<String>>> _getOzzieFiles(
-      String rootFolderName) async {
+    String rootFolderName,
+  ) async {
     final rootDirectory = Directory(rootFolderName);
     final allFiles =
         rootDirectory.listSync(recursive: false, followLinks: false);
@@ -44,16 +50,20 @@ class Reporter {
       final screenshots = directory
           .listSync(recursive: false, followLinks: false)
           .map((s) => s.path.replaceAll(rootFolderName, ''))
+          .where((s) => s.endsWith('png'))
           .toList();
       ozzieFiles[directory.path] = screenshots..sort();
     });
     return ozzieFiles;
   }
 
-  String _buildImageGallery(Map<String, List<String>> ozzieFiles) {
+  String _buildImageGallery(
+    String groupName,
+    Map<String, List<String>> ozzieFiles,
+  ) {
     var accordionBuffer = StringBuffer();
     ozzieFiles.keys.forEach((String entryName) {
-      final entry = _buildAccordion(entryName, ozzieFiles[entryName]);
+      final entry = _buildAccordion(groupName, ozzieFiles[entryName]);
       accordionBuffer.write(entry);
     });
     final accordion = accordionBuffer.toString();
@@ -71,9 +81,18 @@ class Reporter {
 <div class="card">
   <div class="card-header" id="heading$randomId">
     <h5 class="mb-0">
-      <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse$randomId" aria-expanded="true" aria-controls="collapse$randomId">
-        $accordionName
-      </button>
+      <div class="row justify-content-between">
+        <div class="col-4">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse$randomId" aria-expanded="true" aria-controls="collapse$randomId">
+            $accordionName
+          </button>
+        </div>
+        <div class="col-8">
+          <a href="./$accordionName/$accordionName.zip" class="btn btn-outline-primary float-right" download>
+            Download Images
+          </a>
+        </div>
+      </div>
     </h5>
   </div>
   <div id="collapse$randomId" class="collapse" aria-labelledby="heading$randomId" data-parent="#ozzieAccordion">

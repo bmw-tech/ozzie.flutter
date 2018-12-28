@@ -19,7 +19,10 @@ void main() {
   });
 
   test('generates HTML report on the given folder', () async {
-    await reporter.generateHtmlReport(testFolder);
+    await reporter.generateHtmlReport(
+      rootFolderName: testFolder,
+      groupName: 'test',
+    );
     final isHtmlReportGenerated = await File('$testFolder/index.html').exists();
     expect(true, isHtmlReportGenerated);
   });
