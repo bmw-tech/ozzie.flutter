@@ -5,10 +5,11 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'reporter.dart';
+import 'zip_generator.dart';
 
 const rootFolderName = "ozzie";
 
-/// [Ozzie] is the class responsible for taking screenshots and generating 
+/// [Ozzie] is the class responsible for taking screenshots and generating
 /// an HTML report when running your integrationt tests on Flutter.
 class Ozzie {
   final FlutterDriver driver;
@@ -19,13 +20,13 @@ class Ozzie {
       : assert(driver != null);
 
   /// Build an [Ozzie] object with the given [FlutterDriver]. If a `groupName`
-  /// is given, it will be used to group your screenshots in the HTML report; 
+  /// is given, it will be used to group your screenshots in the HTML report;
   /// otherwise, they will be placed under a "default" group.
   /// This method is intended to be called in your tests `setUp`, immediately
   /// after a [FlutterDriver] object has been built.
-  /// 
+  ///
   /// Usage:
-  /// 
+  ///
   /// ```
   /// Ozzie.initWith(driver) -> will group the screenshots taken under "default"
   /// Ozzie.initWith(driver, 'my_report') -> will group the screenshots taken under "my_report"
@@ -33,7 +34,7 @@ class Ozzie {
   factory Ozzie.initWith(FlutterDriver driver, {@required String groupName}) =>
       Ozzie._internal(driver, groupName: groupName);
 
-  /// It takes a an PNG screnshot of the given state of the application when 
+  /// It takes a an PNG screnshot of the given state of the application when
   /// being called. The name of the screenshot will be the given `screenshotName`
   /// prefixed by the timestamp of that moment, and suffixed by `.png`.
   /// It will be stored in a folder whose name will be the given `groupName`
@@ -55,8 +56,20 @@ class Ozzie {
   /// This is method is intended to be called in your tests `tearDown`,
   /// immediately after closing the given [FlutterDriver].
   Future generateHtmlReport() async {
+    await _generateZipFiles();
     final reporter = Reporter();
-    await reporter.generateHtmlReport(rootFolderName);
+    await reporter.generateHtmlReport(
+      rootFolderName: rootFolderName,
+      groupName: groupName,
+    );
+  }
+
+  Future _generateZipFiles() async {
+    final zipGenerator = ZipGenerator();
+    await zipGenerator.generateZipInFolder(
+      groupFolderName: _groupFolderName,
+      groupName: groupName,
+    );
   }
 
   Future _deleteExistingGroupFolder() async {
