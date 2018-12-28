@@ -88,9 +88,15 @@ class Reporter {
           </button>
         </div>
         <div class="col-8">
-          <a href="./$accordionName/$accordionName.zip" class="btn btn-outline-primary float-right" download>
-            Download Images
-          </a>
+          <div class="float-right">
+            <a href="./$accordionName/$accordionName.zip" class="btn btn-outline-primary" download>
+              Download Images
+            </a>
+            <button type="button" href="#" class="btn btn-outline-primary" data-toggle="modal" data-target="#${_modalId(accordionName)}">
+              Show Slideshow
+            </button>
+            ${_buildSlideshow(images, modalId: _modalId(accordionName), modalName: accordionName,)}
+          </div>
         </div>
       </div>
     </h5>
@@ -122,6 +128,67 @@ class Reporter {
     return '<div class="row">$imageCards</div>';
   }
 
+  String _buildSlideshow(
+    List<String> images, {
+    @required String modalId,
+    @required String modalName,
+  }) {
+    return """
+<div class="modal fade" id="$modalId" tabIndex="-1" role="dialog" aria-labelledby="${modalId}Label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="${modalId}Label">$modalName</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="carouselExampleControls" class="carousel slide carousel-fade" data-ride="carousel" data-interval="2000">
+          <div class="carousel-inner">
+            ${_buildCarousel(images)}
+          </div>
+          <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+""";
+  }
+
+  String _buildCarousel(List<String> images) {
+    final buffer = StringBuffer();
+    for (var index = 0; index < images.length; index++) {
+      if (index == 0) {
+        buffer.write("""
+<div class="carousel-item active">
+  <img src="./${images[index]}" class="d-block w-100" alt="${images[index]}">
+</div>
+""");
+      } else {
+        buffer.write("""
+<div class="carousel-item">
+  <img src="./${images[index]}" class="d-block w-100" alt="${images[index]}">
+</div>
+""");
+      }
+    }
+    return buffer.toString();
+  }
+
   String _accordionId(String accordionName) =>
       '${accordionName.trim().replaceAll(' ', '_').replaceAll('/', '_')}${accordionName.length}';
+
+  String _modalId(String accordionName) => "${accordionName}Modal";
 }
