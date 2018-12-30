@@ -20,6 +20,8 @@ class ZipGenerator {
     zipEncoder.close();
   }
 
+  /// It generates a ZIP file named `ozzie.zip` with the contents inside the
+  /// given [rootFolder]
   Future generateZipWithAllGroups({String rootFolder = 'ozzie'}) async {
     final directory = Directory(rootFolder);
     final zipEncoder = ZipFileEncoder();
