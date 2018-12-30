@@ -1,6 +1,6 @@
 name: ozzie
 description: Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need.
-version: 1.0.2
+version: 2.0.0
 author: Jorge Coca<jcocaramos@gmail.com>
 homepage: https://github.com/jorgecoca/ozzie.flutter
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 2.0.0 (2018-12-30)
+
+* Be able to download all the screenshots generated from the web report
+* Be able to download all the screenshots generated for a particular group from the web report
+* You can preview all the group screenshots in a slideshow
+* Updated documentation
+* Updated test dependencies
+
 ## Version 1.0.2(2018-11-27)
 
 * Update Mockito to 4.+
