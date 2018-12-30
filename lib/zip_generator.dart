@@ -6,7 +6,6 @@ import 'package:archive/archive_io.dart';
 
 /// Utility class to generate ZIP files
 class ZipGenerator {
-
   /// It generates a ZIP file with the contents inside [groupFolderName], with
   /// the name `groupName.zip`.
   Future generateZipInFolder({
@@ -18,6 +17,18 @@ class ZipGenerator {
     final imageFiles = directory.listSync(recursive: false, followLinks: false);
     zipEncoder.create('$groupFolderName/$groupName.zip');
     imageFiles.forEach((imageFile) => zipEncoder.addFile(imageFile));
+    zipEncoder.close();
+  }
+
+  Future generateZipWithAllGroups({String rootFolder = 'ozzie'}) async {
+    final directory = Directory(rootFolder);
+    final zipEncoder = ZipFileEncoder();
+    final directories = directory
+        .listSync(recursive: false, followLinks: false)
+        .where((d) => d is Directory)
+        .toList();
+    zipEncoder.create('$rootFolder/ozzie.zip');
+    directories.forEach((dir) => zipEncoder.addDirectory(dir));
     zipEncoder.close();
   }
 }

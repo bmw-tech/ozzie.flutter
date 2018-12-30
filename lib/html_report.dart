@@ -27,6 +27,9 @@ const beginningOfHtmlReport = """
           </svg>
           <strong>Ozzie - Test Report</strong>
         </a>
+        <a href="./ozzie.zip" class="btn btn-outline-success" download>
+          Download All Images
+        </a>
       </div>
     </div>
   </header>

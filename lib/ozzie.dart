@@ -66,6 +66,7 @@ class Ozzie {
 
   Future _generateZipFiles() async {
     final zipGenerator = ZipGenerator();
+    await zipGenerator.generateZipWithAllGroups();
     await zipGenerator.generateZipInFolder(
       groupFolderName: _groupFolderName,
       groupName: groupName,
