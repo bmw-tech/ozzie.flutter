@@ -19,7 +19,7 @@ class Reporter {
     @required String groupName,
   }) async {
     final ozzieFiles = await _getOzzieFiles(rootFolderName);
-    final imageGallery = _buildImageGallery(groupName, ozzieFiles);
+    final imageGallery = _buildImageGallery(ozzieFiles);
     String htmlContent =
         '$beginningOfHtmlReport$imageGallery$endingOfHtmlReport';
     final filePath = '$rootFolderName/index.html';
@@ -58,12 +58,11 @@ class Reporter {
   }
 
   String _buildImageGallery(
-    String groupName,
     Map<String, List<String>> ozzieFiles,
   ) {
     var accordionBuffer = StringBuffer();
     ozzieFiles.keys.forEach((String entryName) {
-      final entry = _buildAccordion(groupName, ozzieFiles[entryName]);
+      final entry = _buildAccordion(entryName, ozzieFiles[entryName]);
       accordionBuffer.write(entry);
     });
     final accordion = accordionBuffer.toString();
@@ -84,12 +83,12 @@ class Reporter {
       <div class="row justify-content-between">
         <div class="col-4">
           <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse$randomId" aria-expanded="true" aria-controls="collapse$randomId">
-            $accordionName
+            ${_displayName(accordionName)}
           </button>
         </div>
         <div class="col-8">
           <div class="float-right">
-            <a href="./$accordionName/$accordionName.zip" class="btn btn-outline-primary" download>
+            <a href="./${_displayName(accordionName)}/${_displayName(accordionName)}.zip" class="btn btn-outline-primary" download>
               Download Images
             </a>
             <button type="button" href="#" class="btn btn-outline-primary" data-toggle="modal" data-target="#${_modalId(accordionName)}">
@@ -190,5 +189,7 @@ class Reporter {
   String _accordionId(String accordionName) =>
       '${accordionName.trim().replaceAll(' ', '_').replaceAll('/', '_')}${accordionName.length}';
 
-  String _modalId(String accordionName) => "${accordionName}Modal";
+  String _modalId(String accordionName) => "${_displayName(accordionName)}Modal";
+
+  String _displayName(String ozzieFile) => ozzieFile.replaceAll('ozzie/', '');
 }
