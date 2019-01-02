@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.0.1 (2010-01-02)
+
+* Fixed bug where the HTML report would display all the groups with the same name
+
 ## Version 2.0.0 (2018-12-30)
 
 * Be able to download all the screenshots generated from the web report
