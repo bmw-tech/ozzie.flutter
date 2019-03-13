@@ -94,7 +94,11 @@ class Reporter {
             <button type="button" href="#" class="btn btn-outline-primary" data-toggle="modal" data-target="#${_modalId(accordionName)}">
               Show Slideshow
             </button>
-            ${_buildSlideshow(images, modalId: _modalId(accordionName), modalName: accordionName,)}
+            ${_buildSlideshow(
+      images,
+      modalId: _modalId(accordionName),
+      modalName: accordionName,
+    )}
           </div>
         </div>
       </div>
@@ -189,7 +193,8 @@ class Reporter {
   String _accordionId(String accordionName) =>
       '${accordionName.trim().replaceAll(' ', '_').replaceAll('/', '_')}${accordionName.length}';
 
-  String _modalId(String accordionName) => "${_displayName(accordionName)}Modal";
+  String _modalId(String accordionName) =>
+      "${_displayName(accordionName)}Modal";
 
   String _displayName(String ozzieFile) => ozzieFile.replaceAll('ozzie/', '');
 }
