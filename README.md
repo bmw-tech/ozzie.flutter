@@ -14,7 +14,7 @@ Add `ozzie` to your `pubspec.yaml` as a **dev_dependency**:
 
 ```yaml
 dev_dependencies:
-    ozzie: <latest_version_here>
+  ozzie: <latest_version_here>
 ```
 
 In your Flutter integration tests, create an instance of `Ozzie`, pass the `FlutterDriver`, give it a `groupName` and ask it to `takeScreenshot`. That simple! And whenever you have finished with tests, you can create an HTML report by asking `Ozzie` to `generateHtmlReport`.
@@ -54,6 +54,21 @@ void main() {
 After this, a report will be generated inside your project as `ozzie/index.html`:
 
 ![report example](./art/report.png)
+
+### Optional screenshots
+
+Taking screenshots can take a while, and sometimes you might want to run your integration tests without taking screenshots. If that's the case, you can set `shouldTakeScreenshots` to `false` and skip that part, saving you some precious time:
+
+```dart
+setUpAll(() async {
+  driver = await FlutterDriver.connect();
+  ozzie = Ozzie.initWith(
+    driver,
+    groupName: 'counter',
+    shouldTakeScreenshots: false,
+  );
+});
+```
 
 ## License
 

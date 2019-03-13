@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.1.0
+
+* Added an optional `shouldTakeScreenshots` flag to skip taking screenshots
+
 ## Version 2.0.1 (2010-01-02)
 
 * Fixed bug where the HTML report would display all the groups with the same name
