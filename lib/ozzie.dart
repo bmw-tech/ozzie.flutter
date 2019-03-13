@@ -77,8 +77,6 @@ class Ozzie {
         rootFolderName: rootFolderName,
         groupName: groupName,
       );
-    } else {
-      print('Ozzie - No screenshots taken.');
     }
   }
 
