@@ -11,6 +11,7 @@ void main() {
     ozzie = Ozzie.initWith(
       driver,
       groupName: 'counter',
+      shouldTakeScreenshots: false,
     );
   });
 

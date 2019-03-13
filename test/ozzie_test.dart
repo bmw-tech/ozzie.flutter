@@ -9,10 +9,11 @@ class MockFlutterDriver extends Mock implements FlutterDriver {}
 
 void main() {
   Ozzie ozzie;
-  final FlutterDriver driver = MockFlutterDriver();
+  FlutterDriver driver;
   final testGroupName = 'bender';
 
   setUp(() {
+    driver = MockFlutterDriver();
     ozzie = Ozzie.initWith(driver, groupName: testGroupName);
     when(driver.screenshot()).thenAnswer((_) => Future.value([1, 2, 3]));
   });
@@ -23,62 +24,88 @@ void main() {
     }
   });
 
-  group('Constructor', () {
-    test('a null driver throws an exception', () {
-      expect(() => Ozzie.initWith(null, groupName: ''),
-          throwsA(TypeMatcher<AssertionError>()));
+  group('Ozzie', () {
+    group('Constructor', () {
+      test('a null driver throws an exception', () {
+        expect(() => Ozzie.initWith(null, groupName: ''),
+            throwsA(TypeMatcher<AssertionError>()));
+      });
+
+      test('group name is the one passed as a dependency', () {
+        expect(ozzie.groupName, testGroupName);
+      });
+
+      test('driver is the one passed as a dependency', () {
+        expect(ozzie.driver, driver);
+      });
     });
 
-    test('group name is the one passed as a dependency', () {
-      expect(ozzie.groupName, testGroupName);
+    group('with screenshots enabled', () {
+      test('on first takeScreenshot call the the group folder is deleted',
+          () async {
+        final filePath = '$rootFolderName/$testGroupName';
+        var testFile = await File('$filePath/testFile').create(recursive: true);
+        testFile.writeAsBytes([1, 2, 3]);
+        await ozzie.takeScreenshot('alex');
+        final doesTestFileStillExists =
+            await File('$filePath/testFile').exists();
+        expect(false, doesTestFileStillExists);
+      });
+
+      test('takeScreenshots relies on the driver to take the screenshot',
+          () async {
+        await ozzie.takeScreenshot('test');
+        verify(driver.screenshot());
+      });
+
+      test('takeScreenshot generates PNGs containing given name', () async {
+        await ozzie.takeScreenshot('rim');
+        final files =
+            Directory('$rootFolderName/$testGroupName').listSync().toList();
+        final resultFile =
+            files.where((f) => f is File).map((f) => f as File).first;
+        expect(true, resultFile.path.contains('rim.png'));
+      });
+
+      group('HTML report generation', () {
+        test('not calling generateHtmlReport does not create index.html',
+            () async {
+          await ozzie.takeScreenshot('alex');
+          final isHtmlReportGenerated =
+              await File('$rootFolderName/index.html').exists();
+          expect(false, isHtmlReportGenerated);
+        });
+
+        test('generateHtmlReport creates an index.html at the root', () async {
+          await ozzie.takeScreenshot('alex');
+          await ozzie.generateHtmlReport();
+          final isHtmlReportGenerated =
+              await File('$rootFolderName/index.html').exists();
+          expect(true, isHtmlReportGenerated);
+        });
+      });
     });
 
-    test('driver is the one passed as a dependency', () {
-      expect(ozzie.driver, driver);
-    });
-  });
+    group('with screenshots disabled', () {
+      test('should not take any screenshots', () async {
+        final noScreenshotsOzzie = Ozzie.initWith(
+          driver,
+          shouldTakeScreenshots: false,
+        );
+        await noScreenshotsOzzie.takeScreenshot('test');
+        verifyNever(driver.screenshot());
+      });
 
-  group('Screenshots', () {
-    test('on first takeScreenshot call the the group folder is deleted',
-        () async {
-      final filePath = '$rootFolderName/$testGroupName';
-      var testFile = await File('$filePath/testFile').create(recursive: true);
-      testFile.writeAsBytes([1, 2, 3]);
-      await ozzie.takeScreenshot('alex');
-      final doesTestFileStillExists = await File('$filePath/testFile').exists();
-      expect(false, doesTestFileStillExists);
-    });
-
-    test('takeScreenshots relies on the driver to take the screenshot',
-        () async {
-      await ozzie.takeScreenshot('test');
-      verify(driver.screenshot());
-    });
-
-    test('takeScreenshot generates PNGs containing given name', () async {
-      await ozzie.takeScreenshot('rim');
-      final files =
-          Directory('$rootFolderName/$testGroupName').listSync().toList();
-      final resultFile =
-          files.where((f) => f is File).map((f) => f as File).first;
-      expect(true, resultFile.path.contains('rim.png'));
-    });
-  });
-
-  group('HTML report generation', () {
-    test('not calling generateHtmlReport does not create index.html', () async {
-      await ozzie.takeScreenshot('alex');
-      final isHtmlReportGenerated =
-          await File('$rootFolderName/index.html').exists();
-      expect(false, isHtmlReportGenerated);
-    });
-
-    test('generateHtmlReport creates an index.html at the root', () async {
-      await ozzie.takeScreenshot('alex');
-      await ozzie.generateHtmlReport();
-      final isHtmlReportGenerated =
-          await File('$rootFolderName/index.html').exists();
-      expect(true, isHtmlReportGenerated);
+      test('should not generate an HTML report', () async {
+        final noScreenshotsOzzie = Ozzie.initWith(
+          driver,
+          shouldTakeScreenshots: false,
+        );
+        await noScreenshotsOzzie.takeScreenshot('alex');
+        final isHtmlReportGenerated =
+            await File('$rootFolderName/index.html').exists();
+        expect(false, isHtmlReportGenerated);
+      });
     });
   });
 }

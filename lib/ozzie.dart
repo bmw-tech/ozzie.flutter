@@ -14,10 +14,14 @@ const rootFolderName = "ozzie";
 class Ozzie {
   final FlutterDriver driver;
   final String groupName;
+  final bool shouldTakeScreenshots;
   var _doesGroupFolderNeedToBeDeleted = true;
 
-  Ozzie._internal(this.driver, {this.groupName = "default"})
-      : assert(driver != null);
+  Ozzie._internal(
+    this.driver, {
+    @required this.groupName,
+    @required this.shouldTakeScreenshots,
+  }) : assert(driver != null);
 
   /// Build an [Ozzie] object with the given [FlutterDriver]. If a `groupName`
   /// is given, it will be used to group your screenshots in the HTML report;
@@ -31,8 +35,16 @@ class Ozzie {
   /// Ozzie.initWith(driver) -> will group the screenshots taken under "default"
   /// Ozzie.initWith(driver, 'my_report') -> will group the screenshots taken under "my_report"
   /// ```
-  factory Ozzie.initWith(FlutterDriver driver, {@required String groupName}) =>
-      Ozzie._internal(driver, groupName: groupName);
+  factory Ozzie.initWith(
+    FlutterDriver driver, {
+    String groupName = "default",
+    bool shouldTakeScreenshots = true,
+  }) =>
+      Ozzie._internal(
+        driver,
+        groupName: groupName,
+        shouldTakeScreenshots: shouldTakeScreenshots,
+      );
 
   /// It takes a an PNG screnshot of the given state of the application when
   /// being called. The name of the screenshot will be the given `screenshotName`
@@ -40,15 +52,17 @@ class Ozzie {
   /// It will be stored in a folder whose name will be the given `groupName`
   /// when calling `Ozzie.initWith`.
   Future takeScreenshot(String screenshotName) async {
-    if (_doesGroupFolderNeedToBeDeleted) {
-      await _deleteExistingGroupFolder();
-      _doesGroupFolderNeedToBeDeleted = false;
+    if (shouldTakeScreenshots) {
+      if (_doesGroupFolderNeedToBeDeleted) {
+        await _deleteExistingGroupFolder();
+        _doesGroupFolderNeedToBeDeleted = false;
+      }
+      final filePath = _filePath(screenshotName);
+      final file = await File(filePath).create(recursive: true);
+      final pixels = await driver.screenshot();
+      await file.writeAsBytes(pixels);
+      print('Ozzie took screenshot: $filePath');
     }
-    final filePath = _filePath(screenshotName);
-    final file = await File(filePath).create(recursive: true);
-    final pixels = await driver.screenshot();
-    await file.writeAsBytes(pixels);
-    print('Ozzie took screenshot: $filePath');
   }
 
   /// This is the method that will generate the HTML report with all the
@@ -56,12 +70,16 @@ class Ozzie {
   /// This is method is intended to be called in your tests `tearDown`,
   /// immediately after closing the given [FlutterDriver].
   Future generateHtmlReport() async {
-    await _generateZipFiles();
-    final reporter = Reporter();
-    await reporter.generateHtmlReport(
-      rootFolderName: rootFolderName,
-      groupName: groupName,
-    );
+    if (shouldTakeScreenshots) {
+      await _generateZipFiles();
+      final reporter = Reporter();
+      await reporter.generateHtmlReport(
+        rootFolderName: rootFolderName,
+        groupName: groupName,
+      );
+    } else {
+      print('Ozzie - No screenshots taken.');
+    }
   }
 
   Future _generateZipFiles() async {
