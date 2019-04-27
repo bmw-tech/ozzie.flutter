@@ -1,0 +1,43 @@
+{
+  "average_frame_build_time_millis": 1.7423846153846156,
+  "90th_percentile_frame_build_time_millis": 2.067,
+  "99th_percentile_frame_build_time_millis": 4.522,
+  "worst_frame_build_time_millis": 4.522,
+  "missed_frame_build_budget_count": 0,
+  "average_frame_rasterizer_time_millis": 3.7686153846153845,
+  "90th_percentile_frame_rasterizer_time_millis": 5.435,
+  "99th_percentile_frame_rasterizer_time_millis": 5.557,
+  "worst_frame_rasterizer_time_millis": 5.557,
+  "missed_frame_rasterizer_budget_count": 0,
+  "frame_count": 13,
+  "frame_build_times": [
+    4522,
+    1225,
+    1484,
+    1335,
+    2067,
+    1178,
+    1235,
+    1996,
+    1843,
+    1353,
+    1193,
+    1579,
+    1641
+  ],
+  "frame_rasterizer_times": [
+    1779,
+    3435,
+    4448,
+    2764,
+    3183,
+    3887,
+    5557,
+    4366,
+    4130,
+    3559,
+    5435,
+    2713,
+    3736
+  ]
+}

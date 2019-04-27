@@ -70,14 +70,35 @@ class Ozzie {
   /// This is method is intended to be called in your tests `tearDown`,
   /// immediately after closing the given [FlutterDriver].
   Future generateHtmlReport() async {
-    if (shouldTakeScreenshots) {
-      await _generateZipFiles();
-      final reporter = Reporter();
-      await reporter.generateHtmlReport(
-        rootFolderName: rootFolderName,
-        groupName: groupName,
-      );
-    }
+    await _generateZipFiles();
+    final reporter = Reporter();
+    await reporter.generateHtmlReport(
+      rootFolderName: rootFolderName,
+      groupName: groupName,
+    );
+  }
+
+  /// This method will wrap your `body` into the the `traceAction`
+  /// method of the `FlutterDriver` instance, and will generate
+  /// both the the timeline report and the summary report with the
+  /// given `reportName` into your `groupName` folder, under a new
+  /// folder named "profiling"
+  Future<void> profilePerformance(
+    String reportName,
+    Future<dynamic> body(),
+  ) async {
+    final timeline = await driver.traceAction(() async => await body());
+    final summary = TimelineSummary.summarize(timeline);
+    await summary.writeSummaryToFile(
+      reportName,
+      destinationDirectory: 'ozzie/$groupName/profiling',
+      pretty: true,
+    );
+    await summary.writeTimelineToFile(
+      reportName,
+      destinationDirectory: 'ozzie/$groupName/profiling',
+      pretty: true,
+    );
   }
 
   Future _generateZipFiles() async {
