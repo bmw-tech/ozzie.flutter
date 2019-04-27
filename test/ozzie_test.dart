@@ -4,18 +4,27 @@ import 'package:test/test.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:ozzie/ozzie.dart';
 import 'package:mockito/mockito.dart';
+import 'dart:convert';
 
 class MockFlutterDriver extends Mock implements FlutterDriver {}
+
+class MockTimeline extends Mock implements Timeline {}
 
 void main() {
   Ozzie ozzie;
   FlutterDriver driver;
   final testGroupName = 'bender';
+  final timeline = MockTimeline();
 
   setUp(() {
     driver = MockFlutterDriver();
     ozzie = Ozzie.initWith(driver, groupName: testGroupName);
     when(driver.screenshot()).thenAnswer((_) => Future.value([1, 2, 3]));
+    when(driver.traceAction(any))
+        .thenAnswer((_) => Future.value(timeline));
+    final timelineJson = jsonDecode(File('./assets/timeline.json').readAsStringSync());
+    final model = Timeline.fromJson(timelineJson);
+    when(timeline.events).thenReturn(model.events);
   });
 
   tearDown(() async {
@@ -38,6 +47,14 @@ void main() {
       test('driver is the one passed as a dependency', () {
         expect(ozzie.driver, driver);
       });
+    });
+
+    test('profilePerformance writes a performance summary and timeline',
+        () async {
+      await ozzie.profilePerformance('myreport', () async {
+        await print('profiling');
+      });
+      verify(driver.traceAction(any)).called(1);
     });
 
     group('with screenshots enabled', () {

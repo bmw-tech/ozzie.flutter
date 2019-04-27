@@ -4,6 +4,7 @@
 .idea
 .pub/
 .settings/
+coverage/*
 *.iml
 **/build
 **/packages

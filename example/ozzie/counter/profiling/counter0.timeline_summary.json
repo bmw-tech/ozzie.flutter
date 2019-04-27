@@ -1,0 +1,22 @@
+{
+  "average_frame_build_time_millis": 13.863999999999999,
+  "90th_percentile_frame_build_time_millis": 26.459,
+  "99th_percentile_frame_build_time_millis": 26.459,
+  "worst_frame_build_time_millis": 26.459,
+  "missed_frame_build_budget_count": 1,
+  "average_frame_rasterizer_time_millis": 5.171333333333334,
+  "90th_percentile_frame_rasterizer_time_millis": 9.086,
+  "99th_percentile_frame_rasterizer_time_millis": 9.086,
+  "worst_frame_rasterizer_time_millis": 9.086,
+  "missed_frame_rasterizer_budget_count": 1,
+  "frame_count": 2,
+  "frame_build_times": [
+    1269,
+    26459
+  ],
+  "frame_rasterizer_times": [
+    9086,
+    4092,
+    2336
+  ]
+}
