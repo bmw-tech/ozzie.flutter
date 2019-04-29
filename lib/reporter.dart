@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:ozzie/html_report.dart';
 
+import 'models/models.dart';
+
 /// [Reporter] is the class in charge of actually generating the HTML report.
 class Reporter {
   /// This method is what generates the HTML report with the given
@@ -18,8 +20,8 @@ class Reporter {
     @required String rootFolderName,
     @required String groupName,
   }) async {
-    final ozzieFiles = await _getOzzieFiles(rootFolderName);
-    final imageGallery = _buildImageGallery(ozzieFiles);
+    final ozzieFiles = await _getOzzieReports(rootFolderName);
+    final imageGallery = _buildOzzieReport(ozzieFiles);
     String htmlContent =
         '$beginningOfHtmlReport$imageGallery$endingOfHtmlReport';
     final filePath = '$rootFolderName/index.html';
@@ -35,34 +37,83 @@ class Reporter {
     print('Ozzie has generated the HTML at: $filePath');
   }
 
-  Future<Map<String, List<String>>> _getOzzieFiles(
+  Future<List<OzzieReport>> _getOzzieReports(
     String rootFolderName,
   ) async {
     final rootDirectory = Directory(rootFolderName);
     final allFiles =
         rootDirectory.listSync(recursive: false, followLinks: false);
-    final directories = allFiles
+    final featureDirectories = allFiles
         .where((f) => (f is Directory))
         .map((f) => f as Directory)
         .toList();
-    var ozzieFiles = Map<String, List<String>>();
-    directories.forEach((directory) {
-      final screenshots = directory
+    var reports = List<OzzieReport>();
+    featureDirectories.forEach((featureDirectory) {
+      final screenshots = featureDirectory
           .listSync(recursive: false, followLinks: false)
           .map((s) => s.path.replaceAll(rootFolderName, ''))
           .where((s) => s.endsWith('png'))
           .toList();
-      ozzieFiles[directory.path] = screenshots..sort();
+      final performanceReports = _getPerformanceReportForFeature(
+        rootFolderName,
+        featureDirectory,
+      );
+      final report = OzzieReport(
+        reportName: featureDirectory.path,
+        screenshots: screenshots,
+        performanceReports: performanceReports,
+      );
+      reports.add(report);
     });
-    return ozzieFiles;
+    return reports;
   }
 
-  String _buildImageGallery(
-    Map<String, List<String>> ozzieFiles,
+  List<PerformanceReport> _getPerformanceReportForFeature(
+    String rootFolderName,
+    Directory featureDirectory,
+  ) {
+    final profileDirectories = featureDirectory
+        .listSync(recursive: false, followLinks: false)
+        .where((d) => d is Directory)
+        .where((d) => d.path.contains('profiling'))
+        .map((d) => d as Directory);
+    if (profileDirectories == null || profileDirectories.isEmpty) return [];
+    var reports = List<PerformanceReport>();
+    final profileContents = profileDirectories.first
+        .listSync(recursive: false, followLinks: false)
+        .map((s) => s.path.replaceAll(rootFolderName, ''));
+    final timelineReports =
+        profileContents.where((s) => s.endsWith('timeline.json')).toList();
+    final summaryReports = profileContents
+        .where((s) => s.endsWith('timeline_summary.json'))
+        .toList();
+    assert(timelineReports.length == summaryReports.length);
+    summaryReports.asMap().forEach((i, r) {
+      final rawContent = _readFileContents(rootFolderName, r);
+      final report = PerformanceReport(
+        testName: _performanceReportTestName(r),
+        timelineReport: timelineReports[i],
+        timelineSummaryReport: r,
+        summaryRawContent: rawContent,
+        summaryReportContent: TimelineSummaryReport.fromStringContent(
+          rawContent,
+        ),
+      );
+      reports.add(report);
+    });
+    return reports;
+  }
+
+  String _buildOzzieReport(
+    List<OzzieReport> ozzieReports,
   ) {
     var accordionBuffer = StringBuffer();
-    ozzieFiles.keys.forEach((String entryName) {
-      final entry = _buildAccordion(entryName, ozzieFiles[entryName]);
+    ozzieReports.forEach((report) {
+      final entry = _buildAccordion(
+        report.reportName,
+        report.screenshots,
+        report.performanceReports,
+      );
       accordionBuffer.write(entry);
     });
     final accordion = accordionBuffer.toString();
@@ -74,7 +125,11 @@ class Reporter {
     """;
   }
 
-  String _buildAccordion(String accordionName, List<String> images) {
+  String _buildAccordion(
+    String accordionName,
+    List<String> screenshots,
+    List<PerformanceReport> performanceReports,
+  ) {
     final randomId = _accordionId(accordionName);
     return """
 <div class="card">
@@ -95,7 +150,7 @@ class Reporter {
               Show Slideshow
             </button>
             ${_buildSlideshow(
-      images,
+      screenshots,
       modalId: _modalId(accordionName),
       modalName: accordionName,
     )}
@@ -106,8 +161,32 @@ class Reporter {
   </div>
   <div id="collapse$randomId" class="collapse" aria-labelledby="heading$randomId" data-parent="#ozzieAccordion">
     <div class="card-body">
-      ${_buildImages(images)}
+      ${_buildScreenshotsAndPerformanceTabs(randomId, _buildImages(screenshots), _buildPerformanceReport(randomId, performanceReports))}
     </div>
+  </div>
+</div>
+    """;
+  }
+
+  String _buildScreenshotsAndPerformanceTabs(String accordionId,
+      String screenshotsHtmlSnippet, String performanceHtmlSnippet) {
+    return """
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link active" id="nav-screenshots-$accordionId-tab" data-toggle="tab" href="#nav-screenshots-$accordionId" role="tab" aria-controls="nav-screenshots-$accordionId" aria-selected="true">Screenshots</a>
+    <a class="nav-item nav-link" id="nav-performance-$accordionId-tab" data-toggle="tab" href="#nav-performance-$accordionId" role="tab" aria-controls="nav-performance-$accordionId" aria-selected="false">Performance</a>
+  </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-screenshots-$accordionId" role="tabpanel" aria-labelledby="nav-screenshots-$accordionId-tab">
+    <p>
+      $screenshotsHtmlSnippet
+    </p>
+  </div>
+  <div class="tab-pane fade" id="nav-performance-$accordionId" role="tabpanel" aria-labelledby="nav-performance-$accordionId-tab">
+    <p>
+      $performanceHtmlSnippet
+    </p>
   </div>
 </div>
     """;
@@ -190,6 +269,81 @@ class Reporter {
     return buffer.toString();
   }
 
+  String _buildPerformanceReport(
+      String accordionId, List<PerformanceReport> performanceReports) {
+    return """
+<div class="row">
+  <div class="col-4">
+    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+      ${_buildPerformanceReportSideMenu(performanceReports)}
+    </div>
+  </div>
+  <div class="col-8">
+    <div class="tab-content" id="v-pills-tabContent">
+      ${_buildPerformanceReportContent(performanceReports)}
+    </div>
+  </div>
+</div>
+    """;
+  }
+
+  String _buildPerformanceReportSideMenu(
+    List<PerformanceReport> performanceReports,
+  ) {
+    final buffer = StringBuffer();
+    for (var index = 0; index < performanceReports.length; index++) {
+      if (index == 0) {
+        buffer.write("""
+<a class="nav-link active" id="v-pills-${performanceReports[index].hashCode}-tab" data-toggle="pill" href="#v-pills-${performanceReports[index].hashCode}" role="tab" aria-controls="v-pills-${performanceReports[index].hashCode}" aria-selected="true">
+  ${performanceReports[index].testName}
+</a>
+        """);
+      } else {
+        buffer.write("""
+<a class="nav-link" id="v-pills-${performanceReports[index].hashCode}-tab" data-toggle="pill" href="#v-pills-${performanceReports[index].hashCode}" role="tab" aria-controls="v-pills-${performanceReports[index].hashCode}" aria-selected="true">
+  ${performanceReports[index].testName}
+</a>
+        """);
+      }
+    }
+    return buffer.toString();
+  }
+
+  String _buildPerformanceReportContent(
+    List<PerformanceReport> performanceReports,
+  ) {
+    final buffer = StringBuffer();
+    for (var index = 0; index < performanceReports.length; index++) {
+      final content = """
+<p>
+  <a href="./${performanceReports[index].timelineSummaryReport}" class="btn btn-outline-primary btn-sm" role="button" aria-pressed="true" download>Download Summary Report</a>
+  <a href="./${performanceReports[index].timelineReport}" class="btn btn-outline-info btn-sm" role="button" aria-pressed="true" download>Download Timeline Report</a>
+</p>
+<p>
+  <pre>
+    <code>
+      ${performanceReports[index].summaryRawContent}
+    </code>
+  </pre>
+</p>
+      """;
+      if (index == 0) {
+        buffer.write("""
+<div class="tab-pane fade show active" id="v-pills-${performanceReports[index].hashCode}" role="tabpanel" aria-labelledby="v-pills-${performanceReports[index].hashCode}-tab">
+  $content
+</div>
+        """);
+      } else {
+        buffer.write("""
+<div class="tab-pane fade show" id="v-pills-${performanceReports[index].hashCode}" role="tabpanel" aria-labelledby="v-pills-${performanceReports[index].hashCode}-tab">
+  $content
+</div>
+        """);
+      }
+    }
+    return buffer.toString();
+  }
+
   String _accordionId(String accordionName) =>
       '${accordionName.trim().replaceAll(' ', '_').replaceAll('/', '_')}${accordionName.length}';
 
@@ -197,4 +351,13 @@ class Reporter {
       "${_displayName(accordionName)}Modal";
 
   String _displayName(String ozzieFile) => ozzieFile.replaceAll('ozzie/', '');
+
+  String _performanceReportTestName(String summaryFileName) => summaryFileName
+      .replaceAll('.timeline_summary.json', '')
+      .replaceAll('profiling/', '');
+
+  String _readFileContents(String rootFolderName, String relativePath) {
+    final file = File('$rootFolderName/$relativePath');
+    return file.readAsStringSync();
+  }
 }
