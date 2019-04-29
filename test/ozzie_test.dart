@@ -20,9 +20,9 @@ void main() {
     driver = MockFlutterDriver();
     ozzie = Ozzie.initWith(driver, groupName: testGroupName);
     when(driver.screenshot()).thenAnswer((_) => Future.value([1, 2, 3]));
-    when(driver.traceAction(any))
-        .thenAnswer((_) => Future.value(timeline));
-    final timelineJson = jsonDecode(File('./assets/timeline.json').readAsStringSync());
+    when(driver.traceAction(any)).thenAnswer((_) => Future.value(timeline));
+    final timelineJson =
+        jsonDecode(File('./assets/timeline.json').readAsStringSync());
     final model = Timeline.fromJson(timelineJson);
     when(timeline.events).thenReturn(model.events);
   });

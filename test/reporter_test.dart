@@ -19,7 +19,32 @@ void main() {
     }
   });
 
-  test('generates HTML report on the given folder', () async {
+  test('generates HTML report on the given folder without performance reports',
+      () async {
+    await reporter.generateHtmlReport(
+      rootFolderName: testFolder,
+      groupName: 'test',
+    );
+    final isHtmlReportGenerated = await File('$testFolder/index.html').exists();
+    expect(true, isHtmlReportGenerated);
+  });
+
+  test('generates HTML report on the given folder with performance reports',
+      () async {
+    final fileContents =
+        File('./assets/timeline_summary.json').readAsStringSync();
+    await File('$testFolder/alex/profiling/a.timeline.json')
+        .create(recursive: true);
+    await File('$testFolder/alex/profiling/b.timeline.json')
+        .create(recursive: true);
+    final aJson =
+        await File('$testFolder/alex/profiling/a.timeline_summary.json')
+            .create(recursive: true);
+    final bJson =
+        await File('$testFolder/alex/profiling/b.timeline_summary.json')
+            .create(recursive: true);
+    aJson.writeAsStringSync(fileContents);
+    bJson.writeAsStringSync(fileContents);
     await reporter.generateHtmlReport(
       rootFolderName: testFolder,
       groupName: 'test',
