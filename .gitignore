@@ -5,6 +5,7 @@
 .pub/
 .settings/
 coverage/*
+example/ozzie/*
 *.iml
 **/build
 **/packages
