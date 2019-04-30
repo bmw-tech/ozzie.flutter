@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:ozzie/html_report.dart';
+import 'performance_scorer.dart';
 
 import 'models/models.dart';
 
@@ -62,6 +63,10 @@ class Reporter {
         reportName: featureDirectory.path,
         screenshots: screenshots,
         performanceReports: performanceReports,
+        performanceScore: PerformanceScorer.score(
+          featureDirectory.path,
+          performanceReports,
+        ),
       );
       reports.add(report);
     });
@@ -90,14 +95,14 @@ class Reporter {
     assert(timelineReports.length == summaryReports.length);
     summaryReports.asMap().forEach((i, r) {
       final rawContent = _readFileContents(rootFolderName, r);
+      final summary = TimelineSummaryReport.fromStringContent(rawContent);
       final report = PerformanceReport(
         testName: _performanceReportTestName(r),
         timelineReport: timelineReports[i],
         timelineSummaryReport: r,
         summaryRawContent: rawContent,
-        summaryReportContent: TimelineSummaryReport.fromStringContent(
-          rawContent,
-        ),
+        summaryReportContent: summary,
+        score: PerformanceScorer.scoreSummary(summary),
       );
       reports.add(report);
     });
@@ -109,11 +114,7 @@ class Reporter {
   ) {
     var accordionBuffer = StringBuffer();
     ozzieReports.forEach((report) {
-      final entry = _buildAccordion(
-        report.reportName,
-        report.screenshots,
-        report.performanceReports,
-      );
+      final entry = _buildAccordion(report);
       accordionBuffer.write(entry);
     });
     final accordion = accordionBuffer.toString();
@@ -126,33 +127,34 @@ class Reporter {
   }
 
   String _buildAccordion(
-    String accordionName,
-    List<String> screenshots,
-    List<PerformanceReport> performanceReports,
+    OzzieReport report,
   ) {
-    final randomId = _accordionId(accordionName);
+    final randomId = _accordionId(report.reportName);
     return """
 <div class="card">
   <div class="card-header" id="heading$randomId">
     <h5 class="mb-0">
       <div class="row justify-content-between">
-        <div class="col-4">
+        <div class="col-3">
           <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse$randomId" aria-expanded="true" aria-controls="collapse$randomId">
-            ${_displayName(accordionName)}
+            ${_displayName(report.reportName)}
           </button>
         </div>
-        <div class="col-8">
+        <div class="col-9">
           <div class="float-right">
-            <a href="./${_displayName(accordionName)}/${_displayName(accordionName)}.zip" class="btn btn-outline-primary" download>
+            ${_performanceBadge("Missed Frames", report.performanceScore?.missedFrames?.infoMessage, report.performanceScore?.missedFrames?.rating)}
+            ${_performanceBadge("Frame Build Rate", report.performanceScore?.frameBuildRate?.infoMessage, report.performanceScore?.frameBuildRate?.rating)}
+            ${_performanceBadge("Frame Rasterizer Rate", report.performanceScore?.frameRasterizerRate?.infoMessage, report.performanceScore?.frameRasterizerRate?.rating)}
+            <a href="./${_displayName(report.reportName)}/${_displayName(report.reportName)}.zip" class="btn btn-outline-primary" download>
               Download Images
             </a>
-            <button type="button" href="#" class="btn btn-outline-primary" data-toggle="modal" data-target="#${_modalId(accordionName)}">
+            <button type="button" href="#" class="btn btn-outline-primary" data-toggle="modal" data-target="#${_modalId(report.reportName)}">
               Show Slideshow
             </button>
             ${_buildSlideshow(
-      screenshots,
-      modalId: _modalId(accordionName),
-      modalName: accordionName,
+      report.screenshots,
+      modalId: _modalId(report.reportName),
+      modalName: report.reportName,
     )}
           </div>
         </div>
@@ -161,7 +163,7 @@ class Reporter {
   </div>
   <div id="collapse$randomId" class="collapse" aria-labelledby="heading$randomId" data-parent="#ozzieAccordion">
     <div class="card-body">
-      ${_buildScreenshotsAndPerformanceTabs(randomId, _buildImages(screenshots), _buildPerformanceReport(randomId, performanceReports))}
+      ${_buildScreenshotsAndPerformanceTabs(randomId, _buildImages(report.screenshots), _buildPerformanceReport(randomId, report.performanceReports))}
     </div>
   </div>
 </div>
@@ -273,12 +275,12 @@ class Reporter {
       String accordionId, List<PerformanceReport> performanceReports) {
     return """
 <div class="row">
-  <div class="col-4">
+  <div class="col-5">
     <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
       ${_buildPerformanceReportSideMenu(performanceReports)}
     </div>
   </div>
-  <div class="col-8">
+  <div class="col-7">
     <div class="tab-content" id="v-pills-tabContent">
       ${_buildPerformanceReportContent(performanceReports)}
     </div>
@@ -296,12 +298,22 @@ class Reporter {
         buffer.write("""
 <a class="nav-link active" id="v-pills-${performanceReports[index].hashCode}-tab" data-toggle="pill" href="#v-pills-${performanceReports[index].hashCode}" role="tab" aria-controls="v-pills-${performanceReports[index].hashCode}" aria-selected="true">
   ${performanceReports[index].testName}
+  <div>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.missedFrames.rating)}"><i class="fas fa-crop"></i></span>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.frameBuildRate.rating)}"><i class="fas fa-tools"></i></span>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.frameRasterizerRate.rating)}"><i class="fas fa-paint-roller"></i></span>
+  </div>
 </a>
         """);
       } else {
         buffer.write("""
 <a class="nav-link" id="v-pills-${performanceReports[index].hashCode}-tab" data-toggle="pill" href="#v-pills-${performanceReports[index].hashCode}" role="tab" aria-controls="v-pills-${performanceReports[index].hashCode}" aria-selected="true">
-  ${performanceReports[index].testName}
+  ${performanceReports[index].testName} 
+  <div>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.missedFrames.rating)}"><i class="fas fa-crop"></i></span>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.frameBuildRate.rating)}"><i class="fas fa-tools"></i></span>
+    <span class="badge badge-${_badgeDecorator(performanceReports[index].score.frameRasterizerRate.rating)}"><i class="fas fa-paint-roller"></i></span>
+  </div>
 </a>
         """);
       }
@@ -318,6 +330,11 @@ class Reporter {
 <p>
   <a href="./${performanceReports[index].timelineSummaryReport}" class="btn btn-outline-primary btn-sm" role="button" aria-pressed="true" download>Download Summary Report</a>
   <a href="./${performanceReports[index].timelineReport}" class="btn btn-outline-info btn-sm" role="button" aria-pressed="true" download>Download Timeline Report</a>
+</p>
+<p>
+  ${_performanceBadge("Missed Frames", performanceReports[index].score?.missedFrames?.infoMessage, performanceReports[index].score?.missedFrames?.rating)}
+  ${_performanceBadge("Frame Build Rate", performanceReports[index].score?.frameBuildRate?.infoMessage, performanceReports[index].score?.frameBuildRate?.rating)}
+  ${_performanceBadge("Frame Rasterizer Rate", performanceReports[index].score?.frameRasterizerRate?.infoMessage, performanceReports[index].score?.frameRasterizerRate?.rating)}
 </p>
 <p>
   <pre>
@@ -359,5 +376,24 @@ class Reporter {
   String _readFileContents(String rootFolderName, String relativePath) {
     final file = File('$rootFolderName/$relativePath');
     return file.readAsStringSync();
+  }
+
+  String _performanceBadge(
+    String message,
+    String tooltipMessage,
+    Rating rating,
+  ) {
+    return """
+<a href="#" class="badge badge-pill badge-${_badgeDecorator(rating)}" data-toggle="tooltip" data-placement="top" title="$tooltipMessage">
+  $message
+</a>
+    """;
+  }
+
+  String _badgeDecorator(Rating rating) {
+    if (rating == null) return 'secondary';
+    if (rating == Rating.success) return 'success';
+    if (rating == Rating.warning) return 'warning';
+    return 'danger';
   }
 }
