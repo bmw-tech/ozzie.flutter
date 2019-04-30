@@ -70,8 +70,9 @@ class Ozzie {
   /// This is method is intended to be called in your tests `tearDown`,
   /// immediately after closing the given [FlutterDriver].
   Future generateHtmlReport() async {
-    if (!await Directory(_groupFolderName).exists())
-      Directory(_groupFolderName).create();
+    if (!await Directory(_groupFolderName).exists()) {
+      await Directory(_groupFolderName).create(recursive: true);
+    }
     await _generateZipFiles();
     final reporter = Reporter();
     await reporter.generateHtmlReport(
