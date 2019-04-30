@@ -49,6 +49,12 @@ void main() {
       });
     });
 
+    test('not taking screenshots still generates an HTML report', () async {
+      await ozzie.generateHtmlReport();
+      final fileExists = await File('$rootFolderName/index.html').exists();
+      expect(fileExists, isTrue);
+    });
+
     test('profilePerformance writes a performance summary and timeline',
         () async {
       await ozzie.profilePerformance('myreport', () async {
