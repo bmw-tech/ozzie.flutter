@@ -6,7 +6,7 @@
 
 ![ozzie icon art](./art/ozzie.png)
 
-Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need.
+Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need. Ozzie will capture performance reports for you.
 
 ## How it works
 
@@ -18,6 +18,8 @@ dev_dependencies:
 ```
 
 In your Flutter integration tests, create an instance of `Ozzie`, pass the `FlutterDriver`, give it a `groupName` and ask it to `takeScreenshot`. That simple! And whenever you have finished with tests, you can create an HTML report by asking `Ozzie` to `generateHtmlReport`.
+
+If you want to measure the performance of your app, simple wrap your integration tests in `profilePerformance` and it will be added to the HTML report.
 
 Here's an example:
 
@@ -41,19 +43,25 @@ void main() {
   });
 
   test('initial counter is 0', () async {
-    await ozzie.takeScreenshot('initial_counter_is_0');
+    await ozzie.profilePerformance('counter0', () async {
+      await driver.waitFor(find.text('0'));
+      await ozzie.takeScreenshot('initial_counter_is_0');
+    });
   });
 
   test('initial counter is 0', () async {
-    driver.tap(find.byType('FloatingActionButton'));
-    await ozzie.takeScreenshot('counter_is_1');
+    await ozzie.profilePerformance('counter1', () async {
+      await driver.tap(find.byType('FloatingActionButton'));
+      await driver.waitFor(find.text('1'));
+      await ozzie.takeScreenshot('counter_is_1');
+    });
   });
 }
 ```
 
 After this, a report will be generated inside your project as `ozzie/index.html`:
 
-![report example](./art/report.png)
+![report example](./art/report.gif)
 
 ### Optional screenshots
 
