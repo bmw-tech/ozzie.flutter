@@ -1,10 +1,16 @@
 import 'models/models.dart';
 
-/// Class responsible for scoring the performance of features
+/// Class responsible for scoring the performance of features. It
+/// takes a [PerformanceConfiguration] object to determine the warning
+/// and error thresholds of the test reports.
 class PerformanceScorer {
+  final PerformanceConfiguration configuration;
+
+  PerformanceScorer(this.configuration);
+
   /// It gives an overall [PerformanceScore] for the the different
   /// reports given
-  static PerformanceScore score(
+  PerformanceScore score(
     String reportName,
     List<PerformanceReport> reports,
   ) {
@@ -24,7 +30,7 @@ class PerformanceScorer {
   }
 
   /// It gives a [Score] about missed frames for the given `reports`
-  static Score scoreMissedFrames(List<PerformanceReport> reports) {
+  Score scoreMissedFrames(List<PerformanceReport> reports) {
     if (reports == null || reports.isEmpty) return null;
     final totalFrames = reports
         .map((r) => r.summaryReportContent.frameCount)
@@ -36,7 +42,7 @@ class PerformanceScorer {
   }
 
   /// It gives a [Score] about the frame build rate for the given `reports`
-  static Score scoreFrameBuildRate(List<PerformanceReport> reports) {
+  Score scoreFrameBuildRate(List<PerformanceReport> reports) {
     if (reports == null || reports.isEmpty) return null;
     final totalOfAverageBuildTimes = reports
         .map((r) => r.summaryReportContent.averageFrameBuildTimeMillis)
@@ -46,7 +52,7 @@ class PerformanceScorer {
   }
 
   /// It gives a [Score] about the frame rasterizer rate for the given `reports`
-  static Score scoreFrameRasterizerRate(List<PerformanceReport> reports) {
+  Score scoreFrameRasterizerRate(List<PerformanceReport> reports) {
     if (reports == null || reports.isEmpty) return null;
     final totalOfAverageRasterizerTimes = reports
         .map((r) => r.summaryReportContent.averageFrameRasterizerTimeMillis)
@@ -59,7 +65,7 @@ class PerformanceScorer {
   }
 
   /// It gives a [PerformanceScore] for the given `report`
-  static PerformanceScore scoreSummary(TimelineSummaryReport report) {
+  PerformanceScore scoreSummary(TimelineSummaryReport report) {
     if (report == null) return null;
     final missedFramesScore = scoreMissedFramesOnSummary(report);
     final frameBuildRateScore = scoreFrameBuildRateOnSummary(report);
@@ -72,7 +78,7 @@ class PerformanceScorer {
   }
 
   /// It gives a [Score] about missed frames for the given `report`
-  static Score scoreMissedFramesOnSummary(TimelineSummaryReport report) {
+  Score scoreMissedFramesOnSummary(TimelineSummaryReport report) {
     if (report == null) return null;
     final totalFrames = report.frameCount;
     final missedFrames = report.missedFrameBuildBudgetCount;
@@ -80,13 +86,13 @@ class PerformanceScorer {
   }
 
   /// It gives a [Score] about the frame build rate for the given `report`
-  static Score scoreFrameBuildRateOnSummary(TimelineSummaryReport report) {
+  Score scoreFrameBuildRateOnSummary(TimelineSummaryReport report) {
     if (report == null) return null;
     return _scoreFrameBuildRate(1, report.averageFrameBuildTimeMillis);
   }
 
   /// It gives a [Score] about the frame rasterizer rate for the given `reports`
-  static Score scoreFrameRasterizerRateOnSummary(
+  Score scoreFrameRasterizerRateOnSummary(
     TimelineSummaryReport report,
   ) {
     if (report == null) return null;
@@ -96,25 +102,35 @@ class PerformanceScorer {
     );
   }
 
-  static Score _scoreMissedFrames(
+  Score _scoreMissedFrames(
     int totalFrames,
     int missedFrames,
   ) {
     final missedPercentage = (missedFrames / totalFrames * 100);
     final infoMessage =
         'The percentage of missed frames is $missedPercentage % (Total: $totalFrames, missed: $missedFrames)';
-    if (missedPercentage > 10) return Score(Rating.failure, infoMessage);
-    if (missedPercentage > 5) return Score(Rating.warning, infoMessage);
+    final errorPercentage = configuration.missedFramesThreshold.errorPercentage;
+    final warningPercentage =
+        configuration.missedFramesThreshold.warningPercentage;
+    if (missedPercentage > errorPercentage)
+      return Score(Rating.failure, infoMessage);
+    if (missedPercentage > warningPercentage)
+      return Score(Rating.warning, infoMessage);
     return Score(Rating.success, infoMessage);
   }
 
-  static Score _scoreFrameBuildRate(
+  Score _scoreFrameBuildRate(
       int totalReports, double totalOfAverageBuildTimes) {
     final totalAverage = totalOfAverageBuildTimes / totalReports;
     final infoMessage =
         'The average_frame_build_time_millis of this feature is $totalAverage';
-    if (totalAverage > 16) return Score(Rating.failure, infoMessage);
-    if (totalAverage > 14) {
+    final errorThreshold =
+        configuration.frameBuildRateThreshold.errorTimeInMills;
+    final warningThreshold =
+        configuration.frameBuildRateThreshold.warningTimeInMills;
+    if (totalAverage > errorThreshold)
+      return Score(Rating.failure, infoMessage);
+    if (totalAverage > warningThreshold) {
       return Score(
         Rating.warning,
         'Watch out! This is really close to 16 ms -> $infoMessage',
@@ -123,15 +139,20 @@ class PerformanceScorer {
     return Score(Rating.success, 'Getting 60fps => $infoMessage');
   }
 
-  static Score _scoreFrameRasterizerRate(
+  Score _scoreFrameRasterizerRate(
     int totalReports,
     double totalOfAverageRasterizerTimes,
   ) {
     final totalAverage = totalOfAverageRasterizerTimes / totalReports;
     final infoMessage =
         'The average_frame_rasterizer_time_millis of this feature is $totalAverage';
-    if (totalAverage > 16) return Score(Rating.failure, infoMessage);
-    if (totalAverage > 14) {
+    final errorThreshold =
+        configuration.frameRasterizerRateThreshold.errorTimeInMills;
+    final warningThreshold =
+        configuration.frameRasterizerRateThreshold.warningTimeInMills;
+    if (totalAverage > errorThreshold)
+      return Score(Rating.failure, infoMessage);
+    if (totalAverage > warningThreshold) {
       return Score(
         Rating.warning,
         'Watch out! This is really close to 16 ms -> $infoMessage',

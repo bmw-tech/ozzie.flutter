@@ -6,6 +6,24 @@ import 'package:ozzie/performance_scorer.dart';
 class MockTimelineSummaryReport extends Mock implements TimelineSummaryReport {}
 
 void main() {
+  PerformanceScorer performanceScorer;
+  setUp(() {
+    final configuration = PerformanceConfiguration(
+      missedFramesThreshold: MissedFramesThreshold(
+        warningPercentage: 5.0,
+        errorPercentage: 10.0,
+      ),
+      frameBuildRateThreshold: FrameRateThreshold(
+        warningTimeInMills: 14.0,
+        errorTimeInMills: 16.0,
+      ),
+      frameRasterizerRateThreshold: FrameRateThreshold(
+        warningTimeInMills: 14.0,
+        errorTimeInMills: 16.0,
+      ),
+    );
+    performanceScorer = PerformanceScorer(configuration);
+  });
   group('PerformanceScorer', () {
     List<PerformanceReport> reports;
     TimelineSummaryReport summary1;
@@ -44,7 +62,7 @@ void main() {
           when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
           when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
           when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
-          final performanceScore = PerformanceScorer.score('test', reports);
+          final performanceScore = performanceScorer.score('test', reports);
           expect(performanceScore.missedFrames.rating, Rating.success);
           expect(performanceScore.frameBuildRate.rating, Rating.success);
           expect(performanceScore.frameRasterizerRate.rating, Rating.success);
@@ -57,7 +75,7 @@ void main() {
           when(summary2.frameCount).thenReturn(50);
           when(summary1.missedFrameBuildBudgetCount).thenReturn(1);
           when(summary2.missedFrameBuildBudgetCount).thenReturn(0);
-          final score = PerformanceScorer.scoreMissedFrames(reports);
+          final score = performanceScorer.scoreMissedFrames(reports);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -70,7 +88,7 @@ void main() {
           when(summary2.frameCount).thenReturn(50);
           when(summary1.missedFrameBuildBudgetCount).thenReturn(5);
           when(summary2.missedFrameBuildBudgetCount).thenReturn(3);
-          final score = PerformanceScorer.scoreMissedFrames(reports);
+          final score = performanceScorer.scoreMissedFrames(reports);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -83,7 +101,7 @@ void main() {
           when(summary2.frameCount).thenReturn(50);
           when(summary1.missedFrameBuildBudgetCount).thenReturn(10);
           when(summary2.missedFrameBuildBudgetCount).thenReturn(10);
-          final score = PerformanceScorer.scoreMissedFrames(reports);
+          final score = performanceScorer.scoreMissedFrames(reports);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,
@@ -97,7 +115,7 @@ void main() {
             () {
           when(summary1.averageFrameBuildTimeMillis).thenReturn(2.0);
           when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
-          final score = PerformanceScorer.scoreFrameBuildRate(reports);
+          final score = performanceScorer.scoreFrameBuildRate(reports);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -110,7 +128,7 @@ void main() {
             () {
           when(summary1.averageFrameBuildTimeMillis).thenReturn(15.0);
           when(summary2.averageFrameBuildTimeMillis).thenReturn(15.0);
-          final score = PerformanceScorer.scoreFrameBuildRate(reports);
+          final score = performanceScorer.scoreFrameBuildRate(reports);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -122,7 +140,7 @@ void main() {
             () {
           when(summary1.averageFrameBuildTimeMillis).thenReturn(20.0);
           when(summary2.averageFrameBuildTimeMillis).thenReturn(20.0);
-          final score = PerformanceScorer.scoreFrameBuildRate(reports);
+          final score = performanceScorer.scoreFrameBuildRate(reports);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,
@@ -137,7 +155,7 @@ void main() {
             () {
           when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
           when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
-          final score = PerformanceScorer.scoreFrameRasterizerRate(reports);
+          final score = performanceScorer.scoreFrameRasterizerRate(reports);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -150,7 +168,7 @@ void main() {
             () {
           when(summary1.averageFrameRasterizerTimeMillis).thenReturn(15.0);
           when(summary2.averageFrameRasterizerTimeMillis).thenReturn(15.0);
-          final score = PerformanceScorer.scoreFrameRasterizerRate(reports);
+          final score = performanceScorer.scoreFrameRasterizerRate(reports);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -163,7 +181,7 @@ void main() {
             () {
           when(summary1.averageFrameRasterizerTimeMillis).thenReturn(20.0);
           when(summary2.averageFrameRasterizerTimeMillis).thenReturn(20.0);
-          final score = PerformanceScorer.scoreFrameRasterizerRate(reports);
+          final score = performanceScorer.scoreFrameRasterizerRate(reports);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,
@@ -188,7 +206,7 @@ void main() {
           when(summary.missedFrameBuildBudgetCount).thenReturn(1);
           when(summary.averageFrameBuildTimeMillis).thenReturn(2.0);
           when(summary.averageFrameRasterizerTimeMillis).thenReturn(2.0);
-          final performanceScore = PerformanceScorer.scoreSummary(summary);
+          final performanceScore = performanceScorer.scoreSummary(summary);
           expect(performanceScore.missedFrames.rating, Rating.success);
           expect(performanceScore.frameBuildRate.rating, Rating.success);
           expect(performanceScore.frameRasterizerRate.rating, Rating.success);
@@ -199,7 +217,7 @@ void main() {
         test('Rating is success if percentage is below 5', () {
           when(summary.frameCount).thenReturn(100);
           when(summary.missedFrameBuildBudgetCount).thenReturn(1);
-          final score = PerformanceScorer.scoreMissedFramesOnSummary(summary);
+          final score = performanceScorer.scoreMissedFramesOnSummary(summary);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -210,7 +228,7 @@ void main() {
         test('Rating is warning if percentage is between 5 and 10', () {
           when(summary.frameCount).thenReturn(100);
           when(summary.missedFrameBuildBudgetCount).thenReturn(8);
-          final score = PerformanceScorer.scoreMissedFramesOnSummary(summary);
+          final score = performanceScorer.scoreMissedFramesOnSummary(summary);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -221,7 +239,7 @@ void main() {
         test('Rating is success if percentage is above 10', () {
           when(summary.frameCount).thenReturn(100);
           when(summary.missedFrameBuildBudgetCount).thenReturn(20);
-          final score = PerformanceScorer.scoreMissedFramesOnSummary(summary);
+          final score = performanceScorer.scoreMissedFramesOnSummary(summary);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,
@@ -234,7 +252,7 @@ void main() {
         test('Rating is success if averageFrameBuildTimeMillis is below 14',
             () {
           when(summary.averageFrameBuildTimeMillis).thenReturn(2.0);
-          final score = PerformanceScorer.scoreFrameBuildRateOnSummary(summary);
+          final score = performanceScorer.scoreFrameBuildRateOnSummary(summary);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -246,7 +264,7 @@ void main() {
             'Rating is warning if averageFrameBuildTimeMillis is between 14 and 16',
             () {
           when(summary.averageFrameBuildTimeMillis).thenReturn(15.0);
-          final score = PerformanceScorer.scoreFrameBuildRateOnSummary(summary);
+          final score = performanceScorer.scoreFrameBuildRateOnSummary(summary);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -257,7 +275,7 @@ void main() {
         test('Rating is failure if averageFrameBuildTimeMillis is above 16',
             () {
           when(summary.averageFrameBuildTimeMillis).thenReturn(20.0);
-          final score = PerformanceScorer.scoreFrameBuildRateOnSummary(summary);
+          final score = performanceScorer.scoreFrameBuildRateOnSummary(summary);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,
@@ -272,7 +290,7 @@ void main() {
             () {
           when(summary.averageFrameRasterizerTimeMillis).thenReturn(2.0);
           final score =
-              PerformanceScorer.scoreFrameRasterizerRateOnSummary(summary);
+              performanceScorer.scoreFrameRasterizerRateOnSummary(summary);
           expect(score.rating, Rating.success);
           expect(
             score.infoMessage,
@@ -285,7 +303,7 @@ void main() {
             () {
           when(summary.averageFrameRasterizerTimeMillis).thenReturn(15.0);
           final score =
-              PerformanceScorer.scoreFrameRasterizerRateOnSummary(summary);
+              performanceScorer.scoreFrameRasterizerRateOnSummary(summary);
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
@@ -298,7 +316,7 @@ void main() {
             () {
           when(summary.averageFrameRasterizerTimeMillis).thenReturn(20.0);
           final score =
-              PerformanceScorer.scoreFrameRasterizerRateOnSummary(summary);
+              performanceScorer.scoreFrameRasterizerRateOnSummary(summary);
           expect(score.rating, Rating.failure);
           expect(
             score.infoMessage,

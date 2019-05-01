@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:ozzie/html_report.dart';
 import 'performance_scorer.dart';
+import 'performance_configuration_provider.dart';
 
 import 'models/models.dart';
 
@@ -49,6 +50,8 @@ class Reporter {
         .map((f) => f as Directory)
         .toList();
     var reports = List<OzzieReport>();
+    final scoreConfiguration = await PerformanceConfigurationProvider.provide();
+    final performanceScorer = PerformanceScorer(scoreConfiguration);
     featureDirectories.forEach((featureDirectory) {
       final screenshots = featureDirectory
           .listSync(recursive: false, followLinks: false)
@@ -58,15 +61,17 @@ class Reporter {
       final performanceReports = _getPerformanceReportForFeature(
         rootFolderName,
         featureDirectory,
+        performanceScorer,
+      );
+      final score = performanceScorer.score(
+        featureDirectory.path,
+        performanceReports,
       );
       final report = OzzieReport(
         reportName: featureDirectory.path,
         screenshots: screenshots,
         performanceReports: performanceReports,
-        performanceScore: PerformanceScorer.score(
-          featureDirectory.path,
-          performanceReports,
-        ),
+        performanceScore: score,
       );
       reports.add(report);
     });
@@ -76,6 +81,7 @@ class Reporter {
   List<PerformanceReport> _getPerformanceReportForFeature(
     String rootFolderName,
     Directory featureDirectory,
+    PerformanceScorer performanceScorer,
   ) {
     final profileDirectories = featureDirectory
         .listSync(recursive: false, followLinks: false)
@@ -102,7 +108,7 @@ class Reporter {
         timelineSummaryReport: r,
         summaryRawContent: rawContent,
         summaryReportContent: summary,
-        score: PerformanceScorer.scoreSummary(summary),
+        score: performanceScorer.scoreSummary(summary),
       );
       reports.add(report);
     });

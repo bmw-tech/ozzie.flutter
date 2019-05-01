@@ -34,6 +34,7 @@ class TimelineSummaryReport {
     @required this.frameRasterizerTimes,
   });
 
+  /// Given a JSON object, it will parse it to a [TimelineSummaryReport]
   factory TimelineSummaryReport.fromJson(Map<String, dynamic> json) {
     return TimelineSummaryReport(
       averageFrameBuildTimeMillis: json['average_frame_build_time_millis'],
@@ -59,6 +60,7 @@ class TimelineSummaryReport {
     );
   }
 
+  /// Given a string containing jSON, it will parse it to a [TimelineSummaryReport]
   factory TimelineSummaryReport.fromStringContent(String summaryContent) {
     final json = jsonDecode(summaryContent);
     return TimelineSummaryReport.fromJson(json);
