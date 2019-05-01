@@ -6,10 +6,10 @@ void main() {
     test('onWarning message is properly formatted', () {
       final e = FailBuildException.onWarning('test123');
       final expectedMessage = """
-¯\_(ツ)_/¯  Warnign detected
+¯\_(ツ)_/¯  Warning detected
 
-Ozzie has measured warnings on the test123 feature, and your configuration
-suggests that performance tests with warnigns should fail the build.
+Ozzie has detected warnings on the test123 feature, and your configuration
+suggests that performance tests with warnings should fail the build.
     
 Check your configuration at ozzie.yaml in case you want to make adjustments.
   """;
@@ -21,7 +21,7 @@ Check your configuration at ozzie.yaml in case you want to make adjustments.
       final expectedMessage = """
 (╯°□°)╯︵ ɹoɹɹƎ Detected
 
-Ozzie has measured errors on the test123 feature, and your configuration
+Ozzie has detected errors on the test123 feature, and your configuration
 suggests that performance tests with failures should fail the build.
     
 Check your configuration at ozzie.yaml in case you want to make adjustments.
@@ -34,7 +34,7 @@ Check your configuration at ozzie.yaml in case you want to make adjustments.
       final expectedMessage = """FailBuildException: 
 (╯°□°)╯︵ ɹoɹɹƎ Detected
 
-Ozzie has measured errors on the test123 feature, and your configuration
+Ozzie has detected errors on the test123 feature, and your configuration
 suggests that performance tests with failures should fail the build.
     
 Check your configuration at ozzie.yaml in case you want to make adjustments.
