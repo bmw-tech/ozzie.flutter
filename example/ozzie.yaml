@@ -1,3 +1,6 @@
+integration_test_expectations:
+  should_fail_build_on_warning: true
+  should_fail_build_on_error: true
 performance_metrics:
   missed_frames_threshold:
     warning_percentage: 5.0

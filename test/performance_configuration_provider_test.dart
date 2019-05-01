@@ -65,6 +65,9 @@ void main() {
         setUp(() async {
           yamlFile = await File('ozzie.yaml').create(recursive: true);
           yamlFile.writeAsStringSync("""
+integration_test_expectations:
+  should_fail_build_on_warning: true
+  should_fail_build_on_error: true
 performance_metrics:
   missed_frames_threshold:
     warning_percentage: 1.0
@@ -83,6 +86,8 @@ performance_metrics:
         });
         test('returns the configuration defined in the file', () async {
           final config = await PerformanceConfigurationProvider.provide();
+          expect(config.shouldFailBuildOnWarning, true);
+          expect(config.shouldFailBuildOnError, true);
           expect(config.missedFramesThreshold.warningPercentage, 1.0);
           expect(config.missedFramesThreshold.errorPercentage, 1.5);
           expect(config.frameBuildRateThreshold.warningTimeInMills, 1.0);
@@ -98,6 +103,14 @@ performance_metrics:
         final config = await PerformanceConfigurationProvider.provide();
         final defaultConfig =
             PerformanceConfigurationProvider.defaultPerformanceConfiguration;
+        expect(
+          config.shouldFailBuildOnError,
+          defaultConfig.shouldFailBuildOnError,
+        );
+        expect(
+          config.shouldFailBuildOnWarning,
+          defaultConfig.shouldFailBuildOnWarning,
+        );
         expect(
           config.missedFramesThreshold.warningPercentage,
           defaultConfig.missedFramesThreshold.warningPercentage,

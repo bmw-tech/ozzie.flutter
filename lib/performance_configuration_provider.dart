@@ -7,6 +7,8 @@ import 'package:ozzie/models/models.dart';
 /// named `ozzie.yaml` at the root of the project, or provide a
 /// default [PerformanceConfiguration] object instead
 class PerformanceConfigurationProvider {
+  static final _defaultShouldFailBuildOnWarning = false;
+  static final _defaultShouldFailBuildOnError = true;
   static final _defaultMissedFramesErrorPercentage = 10.0;
   static final _defaultMissedFramesWarningPercentage = 5.0;
   static final _defaultFrameBuildRateErrorThresholdInMills = 16.0;
@@ -14,6 +16,10 @@ class PerformanceConfigurationProvider {
   static final _defaultFrameBuildRasterizerErrorThresholdInMills = 16.0;
   static final _defaultFrameBuildRasterizerWarningThresholdInMills = 14.0;
 
+  static final _integrationTestExpectationsKey =
+      'integration_test_expectations';
+  static final _shouldFailBuildOnWarningKey = 'should_fail_build_on_warning';
+  static final _shouldFailBuildOnErrorKey = 'should_fail_build_on_error';
   static final _performanceMetricsKey = 'performance_metrics';
   static final _missedFramesThresholdKey = 'missed_frames_threshold';
   static final _missedFramesErrorPercentageKey = 'error_percentage';
@@ -29,6 +35,8 @@ class PerformanceConfigurationProvider {
   /// Default [PerformanceConfiguration] values
   static PerformanceConfiguration get defaultPerformanceConfiguration {
     return PerformanceConfiguration(
+      shouldFailBuildOnWarning: _defaultShouldFailBuildOnWarning,
+      shouldFailBuildOnError: _defaultShouldFailBuildOnError,
       missedFramesThreshold: MissedFramesThreshold(
         errorPercentage: _defaultMissedFramesErrorPercentage,
         warningPercentage: _defaultMissedFramesWarningPercentage,
@@ -76,7 +84,16 @@ class PerformanceConfigurationProvider {
       final warningFrameRasterizerRate =
           frameRasterizerRate[_frameRasterizerWarningKey] ??
               _defaultFrameBuildRasterizerWarningThresholdInMills;
+      final integrationTestExpectations = yaml[_integrationTestExpectationsKey];
+      final shouldFailBuildOnWarning =
+          integrationTestExpectations[_shouldFailBuildOnWarningKey] ??
+              _defaultShouldFailBuildOnWarning;
+      final shouldFailBuildOnError =
+          integrationTestExpectations[_shouldFailBuildOnErrorKey] ??
+              _defaultShouldFailBuildOnError;
       return PerformanceConfiguration(
+        shouldFailBuildOnError: shouldFailBuildOnError,
+        shouldFailBuildOnWarning: shouldFailBuildOnWarning,
         missedFramesThreshold: MissedFramesThreshold(
           errorPercentage: errorMissedFrames,
           warningPercentage: warningMissedFrames,
