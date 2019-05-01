@@ -1,0 +1,10 @@
+performance_metrics:
+  missed_frames_threshold:
+    warning_percentage: 5.0
+    error_percentage: 10.0
+  frame_build_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
+  frame_rasterizer_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
