@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:ozzie/models/models.dart';
+import 'package:ozzie/exceptions/exceptions.dart';
 import 'package:ozzie/performance_scorer.dart';
 
 class MockTimelineSummaryReport extends Mock implements TimelineSummaryReport {}
@@ -9,6 +10,8 @@ void main() {
   PerformanceScorer performanceScorer;
   setUp(() {
     final configuration = PerformanceConfiguration(
+      shouldFailBuildOnError: true,
+      shouldFailBuildOnWarning: true,
       missedFramesThreshold: MissedFramesThreshold(
         warningPercentage: 5.0,
         errorPercentage: 10.0,
@@ -50,6 +53,150 @@ void main() {
       reports = [report1, report2];
     });
     group('for a list of reports', () {
+      group('build status', () {
+        test(
+            'should be failure if there are warnings and config says to fail on warning',
+            () {
+          try {
+            when(summary1.frameCount).thenReturn(50);
+            when(summary2.frameCount).thenReturn(50);
+            when(summary1.missedFrameBuildBudgetCount).thenReturn(4);
+            when(summary2.missedFrameBuildBudgetCount).thenReturn(0);
+            when(summary1.averageFrameBuildTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
+            when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
+            final configuration = PerformanceConfiguration(
+              shouldFailBuildOnError: false,
+              shouldFailBuildOnWarning: true,
+              missedFramesThreshold: MissedFramesThreshold(
+                warningPercentage: 3.0,
+                errorPercentage: 5.0,
+              ),
+              frameBuildRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+              frameRasterizerRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+            );
+            final scorer = PerformanceScorer(configuration);
+            scorer.score('test', reports);
+            fail('this code should fail');
+          } catch (error) {
+            expect(error is FailBuildException, true);
+          }
+        });
+
+        test(
+            'should pass if there are warnings but config says to not fail on warning',
+            () {
+          try {
+            when(summary1.frameCount).thenReturn(50);
+            when(summary2.frameCount).thenReturn(50);
+            when(summary1.missedFrameBuildBudgetCount).thenReturn(1);
+            when(summary2.missedFrameBuildBudgetCount).thenReturn(0);
+            when(summary1.averageFrameBuildTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
+            when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
+            final configuration = PerformanceConfiguration(
+              shouldFailBuildOnError: false,
+              shouldFailBuildOnWarning: false,
+              missedFramesThreshold: MissedFramesThreshold(
+                warningPercentage: 1.0,
+                errorPercentage: 1.0,
+              ),
+              frameBuildRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+              frameRasterizerRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+            );
+            final scorer = PerformanceScorer(configuration);
+            scorer.score('test', reports);
+          } catch (error) {
+            fail('this code should fail');
+          }
+        });
+
+        test(
+            'should be failure if there are errors and config says to fail on errors',
+            () {
+          try {
+            when(summary1.frameCount).thenReturn(50);
+            when(summary2.frameCount).thenReturn(50);
+            when(summary1.missedFrameBuildBudgetCount).thenReturn(1);
+            when(summary2.missedFrameBuildBudgetCount).thenReturn(0);
+            when(summary1.averageFrameBuildTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
+            when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
+            final configuration = PerformanceConfiguration(
+              shouldFailBuildOnError: true,
+              shouldFailBuildOnWarning: false,
+              missedFramesThreshold: MissedFramesThreshold(
+                warningPercentage: 1.0,
+                errorPercentage: 1.0,
+              ),
+              frameBuildRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+              frameRasterizerRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+            );
+            final scorer = PerformanceScorer(configuration);
+            scorer.score('test', reports);
+            fail('this code should fail');
+          } catch (error) {
+            expect(error is FailBuildException, true);
+          }
+        });
+
+        test(
+            'should pass if there are errors but config says to not fail on errors',
+            () {
+          try {
+            when(summary1.frameCount).thenReturn(50);
+            when(summary2.frameCount).thenReturn(50);
+            when(summary1.missedFrameBuildBudgetCount).thenReturn(1);
+            when(summary2.missedFrameBuildBudgetCount).thenReturn(0);
+            when(summary1.averageFrameBuildTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameBuildTimeMillis).thenReturn(4.0);
+            when(summary1.averageFrameRasterizerTimeMillis).thenReturn(2.0);
+            when(summary2.averageFrameRasterizerTimeMillis).thenReturn(4.0);
+            final configuration = PerformanceConfiguration(
+              shouldFailBuildOnError: false,
+              shouldFailBuildOnWarning: false,
+              missedFramesThreshold: MissedFramesThreshold(
+                warningPercentage: 1.0,
+                errorPercentage: 1.0,
+              ),
+              frameBuildRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+              frameRasterizerRateThreshold: FrameRateThreshold(
+                warningTimeInMills: 1.0,
+                errorTimeInMills: 1.0,
+              ),
+            );
+            final scorer = PerformanceScorer(configuration);
+            scorer.score('test', reports);
+          } catch (error) {
+            fail('this code should fail');
+          }
+        });
+      });
+
       group('score', () {
         test(
             'gives information about missedFrames, frameBuildRate and frameRasterizerRate',
@@ -132,7 +279,7 @@ void main() {
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
-            'Watch out! This is really close to 16 ms -> The average_frame_build_time_millis of this feature is 15.0',
+            'Watch out! This is really close to 16.0 ms -> The average_frame_build_time_millis of this feature is 15.0',
           );
         });
 
@@ -172,7 +319,7 @@ void main() {
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
-            'Watch out! This is really close to 16 ms -> The average_frame_rasterizer_time_millis of this feature is 15.0',
+            'Watch out! This is really close to 16.0 ms -> The average_frame_rasterizer_time_millis of this feature is 15.0',
           );
         });
 
@@ -268,7 +415,7 @@ void main() {
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
-            'Watch out! This is really close to 16 ms -> The average_frame_build_time_millis of this feature is 15.0',
+            'Watch out! This is really close to 16.0 ms -> The average_frame_build_time_millis of this feature is 15.0',
           );
         });
 
@@ -307,7 +454,7 @@ void main() {
           expect(score.rating, Rating.warning);
           expect(
             score.infoMessage,
-            'Watch out! This is really close to 16 ms -> The average_frame_rasterizer_time_millis of this feature is 15.0',
+            'Watch out! This is really close to 16.0 ms -> The average_frame_rasterizer_time_millis of this feature is 15.0',
           );
         });
 

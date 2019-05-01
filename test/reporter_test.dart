@@ -31,6 +31,23 @@ void main() {
 
   test('generates HTML report on the given folder with performance reports',
       () async {
+    final config = """
+integration_test_expectations:
+  should_fail_build_on_warning: false
+  should_fail_build_on_error: false
+performance_metrics:
+  missed_frames_threshold:
+    warning_percentage: 5.0
+    error_percentage: 10.0
+  frame_build_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
+  frame_rasterizer_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
+    """;
+    await File('ozzie.yaml').create()
+      ..writeAsStringSync(config);
     final fileContents =
         File('./assets/timeline_summary.json').readAsStringSync();
     await File('$testFolder/alex/profiling/a.timeline.json')
@@ -51,5 +68,6 @@ void main() {
     );
     final isHtmlReportGenerated = await File('$testFolder/index.html').exists();
     expect(true, isHtmlReportGenerated);
+    await File('ozzie.yaml').delete();
   });
 }

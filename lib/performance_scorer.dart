@@ -1,4 +1,6 @@
+import 'package:meta/meta.dart';
 import 'models/models.dart';
+import 'exceptions/exceptions.dart';
 
 /// Class responsible for scoring the performance of features. It
 /// takes a [PerformanceConfiguration] object to determine the warning
@@ -17,11 +19,24 @@ class PerformanceScorer {
     final missedFramesScore = scoreMissedFrames(reports);
     final frameBuildRateScore = scoreFrameBuildRate(reports);
     final frameRasterizerRateScore = scoreFrameRasterizerRate(reports);
+    final shouldFailBuildOnWarning = _shouldFailBuildOnWarning(
+      missedFramesScore: missedFramesScore,
+      frameBuildRateScore: frameBuildRateScore,
+      frameRasterizerRateScore: frameBuildRateScore,
+    );
+    final shouldFailBuildOnError = _shouldFailBuildOnError(
+      missedFramesScore: missedFramesScore,
+      frameBuildRateScore: frameBuildRateScore,
+      frameRasterizerRateScore: frameBuildRateScore,
+    );
     print('[ozzie-performance] Performance report for ${reportName}');
     print('[ozzie-performance] Missed Frames: $missedFramesScore');
     print('[ozzie-performance] Frame Build Rate: $frameBuildRateScore');
     print(
         '[ozzie-performance] Frame Rasterizer Rate: $frameRasterizerRateScore');
+    if (shouldFailBuildOnWarning)
+      throw FailBuildException.onWarning(reportName);
+    if (shouldFailBuildOnError) throw FailBuildException.onError(reportName);
     return PerformanceScore(
       frameBuildRate: frameBuildRateScore,
       missedFrames: missedFramesScore,
@@ -133,7 +148,7 @@ class PerformanceScorer {
     if (totalAverage > warningThreshold) {
       return Score(
         Rating.warning,
-        'Watch out! This is really close to 16 ms -> $infoMessage',
+        'Watch out! This is really close to $errorThreshold ms -> $infoMessage',
       );
     }
     return Score(Rating.success, 'Getting 60fps => $infoMessage');
@@ -155,9 +170,55 @@ class PerformanceScorer {
     if (totalAverage > warningThreshold) {
       return Score(
         Rating.warning,
-        'Watch out! This is really close to 16 ms -> $infoMessage',
+        'Watch out! This is really close to $errorThreshold ms -> $infoMessage',
       );
     }
     return Score(Rating.success, 'Getting 60fps => $infoMessage');
+  }
+
+  bool _shouldFailBuildOnWarning({
+    @required Score missedFramesScore,
+    @required Score frameBuildRateScore,
+    @required Score frameRasterizerRateScore,
+  }) {
+    return configuration.shouldFailBuildOnWarning &&
+        _featureHasWarnings(
+          missedFramesScore: missedFramesScore,
+          frameBuildRateScore: frameBuildRateScore,
+          frameRasterizerRateScore: frameRasterizerRateScore,
+        );
+  }
+
+  bool _shouldFailBuildOnError({
+    @required Score missedFramesScore,
+    @required Score frameBuildRateScore,
+    @required Score frameRasterizerRateScore,
+  }) {
+    return configuration.shouldFailBuildOnError &&
+        _featureHasError(
+          missedFramesScore: missedFramesScore,
+          frameBuildRateScore: frameBuildRateScore,
+          frameRasterizerRateScore: frameRasterizerRateScore,
+        );
+  }
+
+  bool _featureHasWarnings({
+    @required Score missedFramesScore,
+    @required Score frameBuildRateScore,
+    @required Score frameRasterizerRateScore,
+  }) {
+    return missedFramesScore?.rating == Rating.warning ||
+        frameBuildRateScore?.rating == Rating.warning ||
+        frameRasterizerRateScore?.rating == Rating.warning;
+  }
+
+  bool _featureHasError({
+    @required Score missedFramesScore,
+    @required Score frameBuildRateScore,
+    @required Score frameRasterizerRateScore,
+  }) {
+    return missedFramesScore?.rating == Rating.failure ||
+        frameBuildRateScore?.rating == Rating.failure ||
+        frameRasterizerRateScore?.rating == Rating.failure;
   }
 }
