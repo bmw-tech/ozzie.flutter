@@ -1,5 +1,5 @@
 name: ozzie
-description: Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need.
+description: Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need. Ozzie will capture performance reports for you.
 version: 2.2.0
 author: Jorge Coca<jcocaramos@gmail.com>
 homepage: https://github.com/jorgecoca/ozzie.flutter
