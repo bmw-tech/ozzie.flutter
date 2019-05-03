@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.2.2 (2019-05-03)
+
+- `test` dependency: ^1.5.3
+
 ## Version 2.2.1 (2019-05-03)
 
 - Update dependencies
