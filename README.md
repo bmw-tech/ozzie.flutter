@@ -63,6 +63,28 @@ After this, a report will be generated inside your project as `ozzie/index.html`
 
 ![report example](./art/report.gif)
 
+### Using ozzie.yaml to control performance thresholds
+
+You can declare, at the root of your project, an `ozzie.yaml` file to control the different thresholds of your performance tests. If this file is not declared, `Ozzie` will use internal default values:
+
+`ozzie.yaml`:
+
+```yaml
+integration_test_expectations:
+  should_fail_build_on_warning: true
+  should_fail_build_on_error: true
+performance_metrics:
+  missed_frames_threshold:
+    warning_percentage: 5.0
+    error_percentage: 10.0
+  frame_build_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
+  frame_rasterizer_rate_threshold:
+    warning_time_in_millis: 14.0
+    error_time_in_millis: 16.0
+```
+
 ### Optional screenshots
 
 Taking screenshots can take a while, and sometimes you might want to run your integration tests without taking screenshots. If that's the case, you can set `shouldTakeScreenshots` to `false` and skip that part, saving you some precious time:

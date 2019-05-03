@@ -29,7 +29,7 @@ class PerformanceScorer {
       frameBuildRateScore: frameBuildRateScore,
       frameRasterizerRateScore: frameBuildRateScore,
     );
-    print('[ozzie-performance] Performance report for ${reportName}');
+    print('[ozzie-performance] Performance report for $reportName');
     print('[ozzie-performance] Missed Frames: $missedFramesScore');
     print('[ozzie-performance] Frame Build Rate: $frameBuildRateScore');
     print(
