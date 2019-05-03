@@ -1,6 +1,12 @@
 # Changelog
 
-## Version 2.2.0
+## Version 2.2.1 (2019-05-03)
+
+- Update dependencies
+- Complete documentation
+- Fix warnings for better package health
+
+## Version 2.2.0 (2019-05-01)
 
 - Added ability to capture profile reports with `traceAction` from `FlutterDriver`
 - Added support for using a `ozzie.yaml` to determine custom thresholds
@@ -10,7 +16,7 @@
 
 - Added an optional `shouldTakeScreenshots` flag to skip taking screenshots
 
-## Version 2.0.1 (2010-01-02)
+## Version 2.0.1 (2018-01-02)
 
 - Fixed bug where the HTML report would display all the groups with the same name
 
