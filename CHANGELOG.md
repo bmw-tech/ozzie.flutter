@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.2.3
+
+- `test` to ^1.0.0
+- Dart SDK: ^2.2.0
+
 ## Version 2.2.2 (2019-05-03)
 
 - `test` dependency: ^1.5.3
