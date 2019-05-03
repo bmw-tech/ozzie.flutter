@@ -1,6 +1,6 @@
 name: ozzie
 description: Ozzie is your testing friend. Ozzie will take an screenshot during integration tests whenever you need. Ozzie will capture performance reports for you.
-version: 2.2.0
+version: 2.2.1
 author: Jorge Coca<jcocaramos@gmail.com>
 homepage: https://github.com/jorgecoca/ozzie.flutter
 
@@ -12,14 +12,14 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
-  archive: ">=2.0.5 <3.0.0"
-  meta: ">=1.1.1 <2.0.0"
-  test: ">=1.5.1+1 <2.0.0"
+  archive: ^2.0.5
+  meta: ^1.1.1
+  test: ^1.6.0
   yaml: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  mockito: ">=4.0.0 <5.0.0"
+  mockito: ^4.0.0
 
 flutter:

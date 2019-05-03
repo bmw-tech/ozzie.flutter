@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:yaml/yaml.dart';
@@ -55,9 +56,9 @@ class PerformanceConfigurationProvider {
   /// It will provide the values determined in `ozzie.yaml`, or the
   /// default values in case they are not defined.
   static Future<PerformanceConfiguration> provide() async {
-    final configFile = await File('ozzie.yaml');
+    final configFile = File('ozzie.yaml');
     if (!await configFile.exists()) return defaultPerformanceConfiguration;
-    final fileContents = await configFile.readAsStringSync();
+    final fileContents = configFile.readAsStringSync();
     return _parseYamlConfigFile(fileContents);
   }
 
