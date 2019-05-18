@@ -1,6 +1,8 @@
 # ozzie.flutter
 
 [![Pub](https://img.shields.io/pub/v/ozzie.svg)](https://pub.dartlang.org/packages/ozzie)
+[![CircleCI](https://circleci.com/gh/bmw-tech/ozzie.flutter.svg?style=svg)](https://circleci.com/gh/bmw-tech/ozzie.flutter)
+[![codecov](https://codecov.io/gh/bmw-tech/ozzie.flutter/branch/master/graph/badge.svg)](https://codecov.io/gh/bmw-tech/ozzie.flutter)
 
 ![ozzie icon art](./art/ozzie.png)
 
