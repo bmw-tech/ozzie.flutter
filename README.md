@@ -100,6 +100,16 @@ setUpAll(() async {
 });
 ```
 
+## Maintainers
+
+Project Lead(s):
+
+- [Felix Angelov (@felangel)](https://github.com/felangel)
+
+Main Maintainer(s):
+
+- [Jorge Coca (@jorgecoca)](https://github.com/jorgecoca)
+
 ## License
 
 ```
