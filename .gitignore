@@ -11,3 +11,4 @@ example/ozzie/*
 **/packages
 **/pubspec.lock
 **/.packages
+**/flutter_export_environment.sh
