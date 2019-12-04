@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:ozzie/html_report.dart';
-import 'performance_scorer.dart';
-import 'performance_configuration_provider.dart';
 
 import 'models/models.dart';
+import 'performance_scorer.dart';
+import 'performance_configuration_provider.dart';
 
 /// [Reporter] is the class in charge of actually generating the HTML report.
 class Reporter {
@@ -55,7 +55,7 @@ class Reporter {
     featureDirectories.forEach((featureDirectory) {
       final screenshots = featureDirectory
           .listSync(recursive: false, followLinks: false)
-          .map((s) => s.path.replaceAll(rootFolderName, ''))
+          .map((s) => s.path.replaceAll("$rootFolderName", ''))
           .where((s) => s.endsWith('png'))
           .toList();
       final performanceReports = _getPerformanceReportForFeature(
@@ -92,7 +92,7 @@ class Reporter {
     var reports = List<PerformanceReport>();
     final profileContents = profileDirectories.first
         .listSync(recursive: false, followLinks: false)
-        .map((s) => s.path.replaceAll(rootFolderName, ''));
+        .map((s) => s.path.replaceAll("$rootFolderName", ''));
     final timelineReports =
         profileContents.where((s) => s.endsWith('timeline.json')).toList();
     final summaryReports = profileContents
