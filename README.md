@@ -104,11 +104,12 @@ setUpAll(() async {
 
 Project Lead(s):
 
-- [Felix Angelov (@felangel)](https://github.com/felangel)
+- [Tim Chabot](https://github.com/tchabot22)
 
 Main Maintainer(s):
 
 - [Jorge Coca (@jorgecoca)](https://github.com/jorgecoca)
+- [Felix Angelov (@felangel)](https://github.com/felangel)
 
 ## License
 
