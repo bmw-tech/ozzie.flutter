@@ -124,7 +124,7 @@ class Ozzie {
   String get _groupFolderName => '$rootFolderName/$groupName';
 
   String get _timestamp =>
-      DateTime.now().toIso8601String().replaceAll(new RegExp(r':'), '.');
+      DateTime.now().toIso8601String().replaceAll(':', '.');
 
   String _fileName(String screenshotName) => '$_timestamp-$screenshotName.png';
 
