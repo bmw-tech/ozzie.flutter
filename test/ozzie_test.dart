@@ -90,6 +90,16 @@ void main() {
         expect(true, resultFile.path.contains('rim.png'));
       });
 
+      test('takeScreenshot generates PNGs don`t contains character ":" on name',
+          () async {
+        await ozzie.takeScreenshot('character');
+        final files =
+            Directory('$rootFolderName/$testGroupName').listSync().toList();
+        final resultFile =
+            files.where((f) => f is File).map((f) => f as File).first;
+        expect(false, resultFile.path.contains(':'));
+      });
+
       group('HTML report generation', () {
         test('not calling generateHtmlReport does not create index.html',
             () async {
