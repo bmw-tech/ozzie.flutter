@@ -62,6 +62,7 @@ class Ozzie {
       final pixels = await driver.screenshot();
       await file.writeAsBytes(pixels);
       print('Ozzie took screenshot: $filePath');
+      return filePath;
     }
   }
 
