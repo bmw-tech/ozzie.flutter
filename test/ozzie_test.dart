@@ -28,8 +28,8 @@ void main() {
   });
 
   tearDown(() async {
-    if (await Directory(rootFolderName).exists()) {
-      await Directory(rootFolderName).delete(recursive: true);
+    if (await Directory(ozzie.rootFolderName).exists()) {
+      await Directory(ozzie.rootFolderName).delete(recursive: true);
     }
   });
 
@@ -51,7 +51,8 @@ void main() {
 
     test('not taking screenshots still generates an HTML report', () async {
       await ozzie.generateHtmlReport();
-      final fileExists = await File('$rootFolderName/index.html').exists();
+      final fileExists =
+          await File('${ozzie.rootFolderName}/index.html').exists();
       expect(fileExists, isTrue);
     });
 
@@ -66,7 +67,7 @@ void main() {
     group('with screenshots enabled', () {
       test('on first takeScreenshot call the the group folder is deleted',
           () async {
-        final filePath = '$rootFolderName/$testGroupName';
+        final filePath = '${ozzie.rootFolderName}/$testGroupName';
         var testFile = await File('$filePath/testFile').create(recursive: true);
         testFile.writeAsBytes([1, 2, 3]);
         await ozzie.takeScreenshot('alex');
@@ -83,8 +84,9 @@ void main() {
 
       test('takeScreenshot generates PNGs containing given name', () async {
         await ozzie.takeScreenshot('rim');
-        final files =
-            Directory('$rootFolderName/$testGroupName').listSync().toList();
+        final files = Directory('${ozzie.rootFolderName}/$testGroupName')
+            .listSync()
+            .toList();
         final resultFile =
             files.where((f) => f is File).map((f) => f as File).first;
         expect(true, resultFile.path.contains('rim.png'));
@@ -95,7 +97,7 @@ void main() {
             () async {
           await ozzie.takeScreenshot('alex');
           final isHtmlReportGenerated =
-              await File('$rootFolderName/index.html').exists();
+              await File('${ozzie.rootFolderName}/index.html').exists();
           expect(false, isHtmlReportGenerated);
         });
 
@@ -103,7 +105,7 @@ void main() {
           await ozzie.takeScreenshot('alex');
           await ozzie.generateHtmlReport();
           final isHtmlReportGenerated =
-              await File('$rootFolderName/index.html').exists();
+              await File('${ozzie.rootFolderName}/index.html').exists();
           expect(true, isHtmlReportGenerated);
         });
       });
@@ -126,7 +128,7 @@ void main() {
         );
         await noScreenshotsOzzie.takeScreenshot('alex');
         final isHtmlReportGenerated =
-            await File('$rootFolderName/index.html').exists();
+            await File('${ozzie.rootFolderName}/index.html').exists();
         expect(false, isHtmlReportGenerated);
       });
     });

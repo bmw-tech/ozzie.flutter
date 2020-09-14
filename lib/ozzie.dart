@@ -7,19 +7,21 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'reporter.dart';
 import 'zip_generator.dart';
 
-const rootFolderName = "ozzie";
-
 /// [Ozzie] is the class responsible for taking screenshots and generating
 /// an HTML report when running your integrationt tests on Flutter.
 class Ozzie {
   final FlutterDriver driver;
+  final String basePath;
   final String groupName;
+  final String rootFolderName;
   final bool shouldTakeScreenshots;
-  var _doesGroupFolderNeedToBeDeleted = true;
+  bool _doesGroupFolderNeedToBeDeleted = true;
 
   Ozzie._internal(
     this.driver, {
+    this.basePath,
     @required this.groupName,
+    @required this.rootFolderName,
     @required this.shouldTakeScreenshots,
   }) : assert(driver != null);
 
@@ -39,12 +41,12 @@ class Ozzie {
     FlutterDriver driver, {
     String groupName = "default",
     bool shouldTakeScreenshots = true,
+    String rootFolderName = "ozzie",
   }) =>
-      Ozzie._internal(
-        driver,
-        groupName: groupName,
-        shouldTakeScreenshots: shouldTakeScreenshots,
-      );
+      Ozzie._internal(driver,
+          groupName: groupName,
+          shouldTakeScreenshots: shouldTakeScreenshots,
+          rootFolderName: rootFolderName);
 
   /// It takes a an PNG screnshot of the given state of the application when
   /// being called. The name of the screenshot will be the given `screenshotName`
@@ -123,7 +125,8 @@ class Ozzie {
 
   String get _groupFolderName => '$rootFolderName/$groupName';
 
-  String get _timestamp => DateTime.now().toIso8601String();
+  String get _timestamp =>
+      DateTime.now().toIso8601String().replaceAll(':', '.');
 
   String _fileName(String screenshotName) => '$_timestamp-$screenshotName.png';
 
